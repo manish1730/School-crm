@@ -32,7 +32,7 @@ const Sidebar = ({ mobileOpen = false, onClose = () => {} }) => {
       icon: <FaCog />, name: "Settings", path: "/settings",
       subRoutes: [
         { icon: <FaCog />, name: "Audit Logs", path: "/settings/auditlogs" },
-        { icon: <FaCog />, name: "Integration", path: "/settings/integration" },
+        { icon: <FaCog />, name: "Integration", path: "/settings/Integration" },
         { icon: <FaCog />, name: "Masters", path: "/settings/masters" },
         { icon: <FaCog />, name: "School Profile", path: "/settings/schoolprofile" },
       ],
