@@ -16,6 +16,7 @@ import {
 } from "react-icons/fa";
 
 import logo from "../assets/logo.png";
+import {NavLink} from "react-router-dom"
 
 const Sidebar = ({ mobileOpen = false, onClose = () => {} }) => {
   const menu = [
