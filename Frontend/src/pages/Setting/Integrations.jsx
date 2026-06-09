@@ -1,10 +1,12 @@
+
 import React from 'react'
-import Sidebar from '../../components/Sidebar';
-import Navbar from '../../components/Navbar';
-import { useState } from 'react';
+import { useState } from "react";
+import Sidebar from "../../components/Sidebar";
+import Navbar from "../../components/Navbar";
 
 
-const  Integrations = () => {
+
+const Integrations = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -22,7 +24,7 @@ const  Integrations = () => {
           <div className="space-y-4 md:space-y-6">
 
             {/* Your page content goes here */}
-            <h1 className="text-2xl font-bold">Welcome to Integrations</h1>
+            <h1 className="text-2xl font-bold">Welcome to Integrations Page</h1>
 
           </div>
         </main>
@@ -31,4 +33,7 @@ const  Integrations = () => {
   );
 };
 
-export default  Integrations;
+export default Integrations;
+
+
+
