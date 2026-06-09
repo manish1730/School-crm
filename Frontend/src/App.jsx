@@ -1,20 +1,10 @@
-// import './App.css'
-// import Login from './pages/Login'
 
-// function App() {
-//   return (
-//     <>
-//    <Login/>
-//     </>
-//   )
-// }
 
-// export default App
-import DashboardLayout from "./layouts/Dasboardlayout.jsx";
+import { Routes, Route,Navigate } from "react-router-dom";
 import Dashboard from "./pages/Dashboard/Dashboard.jsx";
-import Student from "./pages/Students/Student.jsx";
+import Student from "./pages/Student/Student.jsx";
 import Teacher from "./pages/Teacher/Teacher.jsx";
-import Attendence from "./pages/Attendance/Attendence.jsx";
+import Attendence from "./pages/Attendence/Attendence.jsx";
 import Timetable from "./pages/Timetable/Timetable.jsx";
 import FeeandFinance from "./pages/Fees/FeeandFinance.jsx";
 import Exams from "./pages/Exams/Exams.jsx";
@@ -27,7 +17,7 @@ import Integrations from "./pages/Setting/Integrations.jsx";
 import Masters from "./pages/Setting/Masters.jsx";
 import SchoolProfile from "./pages/Setting/SchoolProfile.jsx";
 
-// import Login from "./pages/Login/Login.jsx"
+
 function App() {
   return (
     <Routes>

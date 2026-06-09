@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useState } from "react";
 import {
   FaHome,
@@ -16,7 +16,7 @@ import {
 } from "react-icons/fa";
 
 import logo from "../assets/logo.png";
-import {NavLink} from "react-router-dom"
+
 
 const Sidebar = ({ mobileOpen = false, onClose = () => {} }) => {
   const menu = [
@@ -95,40 +95,30 @@ const SidebarContent = ({ menu }) => {
               {openDropdown === index && (
                 <div className="ml-4 pl-3 border-l border-white/10 space-y-1 mt-1">
                   {item.subRoutes.map((sub, subIndex) => (
-                    <NavLink
-  key={subIndex}
-  to={sub.path}
-  className={({ isActive }) =>
-    `flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-      isActive
-        ? "bg-[#4f46e5] text-white"
-        : "hover:bg-[#0f215f]"
-    }`
-  }
->
+                    <Link
+                      key={subIndex}
+                      to={sub.path}
+                      className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-400 hover:bg-[#0f215f] hover:text-white transition-all"
+                    >
                       <span>{sub.icon}</span>
                       <span>{sub.name}</span>
-                    </NavLink>
+                    </Link>
                   ))}
                 </div>
               )}
             </div>
-         ) : (
-  <NavLink
-    key={index}
-    to={item.path}
-    className={({ isActive }) =>
-      `flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-        isActive
-          ? "bg-[#4f46e5] text-white"
-          : "hover:bg-[#0f215f]"
-      }`
-    }
-  >
-    <span>{item.icon}</span>
-    <span className="text-sm">{item.name}</span>
-  </NavLink>
-)
+          ) : (
+            <Link
+              key={index}
+              to={item.path}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                index === 0 ? "bg-[#4f46e5]" : "hover:bg-[#0f215f]"
+              }`}
+            >
+              <span>{item.icon}</span>
+              <span className="text-sm">{item.name}</span>
+            </Link>
+          )
         )}
       </div>
 
