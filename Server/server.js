@@ -11,6 +11,14 @@ import departmentRoutes from "./routes/departmentRoutes.js";
 import designationRoutes from "./routes/designationRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import academicCalendarRoutes from "./routes/academicCalendarRoutes.js";
+import enquiryRoutes from "./routes/enquiryRoutes.js";
+import studentRoutes from "./routes/studentRoutes.js";
+import staffRoutes from "./routes/staffRoutes.js";
+import staffAttendanceRoutes from "./routes/staffAttendanceRoutes.js";
+import leaveRoutes from "./routes/leaveRoutes.js";
+import payrollRoutes from "./routes/payrollRoutes.js";
+import studentAttendanceRoutes from "./routes/studentAttendanceRoutes.js";
+import examRoutes from "./routes/examRoutes.js";
 
 dotenv.config();
 
@@ -38,6 +46,14 @@ app.use("/api/departments", departmentRoutes);
 app.use("/api/designations", designationRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/academic-calendar", academicCalendarRoutes);
+app.use("/api/enquiries", enquiryRoutes);
+app.use("/api/students", studentRoutes);
+app.use("/api/staff", staffRoutes);
+app.use("/api/staff-attendance", staffAttendanceRoutes);
+app.use("/api/leaves", leaveRoutes);
+app.use("/api/payroll", payrollRoutes);
+app.use("/api/student-attendance", studentAttendanceRoutes);
+app.use("/api/exams", examRoutes);
 
 // Test Route
 app.get("/", (req, res) => {

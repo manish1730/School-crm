@@ -12,6 +12,7 @@ import {
   FaChevronDown,
   FaChevronUp,
   FaSignOutAlt,
+  FaUserPlus,
 } from "react-icons/fa";
 import { NavLink, useLocation,useNavigate} from "react-router-dom";
 
@@ -21,6 +22,14 @@ const Sidebar = ({ mobileOpen = false, onClose = () => {} }) => {
   const navigate = useNavigate();
   const menu = [
     { icon: <FaHome />, name: "Dashboard", path: "/Dashboard" },
+    {
+      icon: <FaUserPlus />,
+      name: "Admission",
+      subRoutes: [
+        { icon: <FaUserPlus />, name: "Enquiry", path: "/Admission/Enquiry" },
+        { icon: <FaUserPlus />, name: "New Admission", path: "/Admission/New-Admission" },
+      ],
+    },
     { icon: <FaUserGraduate />, name: "Students", path: "/Student" },
     { icon: <FaChalkboardTeacher />, name: "Teachers", path: "/Teacher" },
     { icon: <FaClipboardCheck />, name: "Attendance", path: "/Attendence" },

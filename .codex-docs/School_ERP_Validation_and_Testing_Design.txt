@@ -1,0 +1,496 @@
+You are a Senior MERN Stack Architect, QA Engineer , and School ERP Domain Expert.
+I have already generated the School CRM modules.
+Now I want you to perform a complete validation and testing design review for every module.
+For each module generate:
+Frontend Validations
+Backend Validations
+Database Constraints
+Business Rules
+Edge Cases
+Security Checks
+Role-Based Access Rules
+Error Messages
+Test Cases
+API Validation Requirements
+==================================================== GLOBAL VALIDATIONS
+====================================================
+Apply to entire application:
+Authentication:
+JWT token required
+Invalid token rejected
+Expired token rejected
+Unauthorized access blocked
+Protected routes enforced
+Input Security:
+Trim all string inputs
+Prevent empty spaces
+Prevent script injection
+Prevent HTML injection
+Prevent MongoDB injection
+Prevent duplicate submissions
+Audit Fields:
+Every collection should contain:
+createdBy
+updatedBy
+createdAt
+updatedAt
+isActive
+1. 
+2. 
+3. 
+4. 
+5. 
+6. 
+7. 
+8. 
+9. 
+10. 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+1
+Soft Delete:
+Never permanently delete records
+Set isActive=false
+==================================================== ADMISSION ENQUIRY
+====================================================
+Validations:
+Student Name:
+Required
+Min 3 chars
+Max 100 chars
+Phone:
+Required
+Exactly 10 digits
+Numbers only
+Source:
+Required
+Enum values only
+Counsellor:
+Required
+Status:
+Required
+Business Rules:
+Converted enquiry cannot be edited
+Converted enquiry cannot be converted again
+Test Cases:
+✓ Create enquiry ✓ Edit enquiry ✓ Delete enquiry ✓ Convert enquiry ✓ Search enquiry ✓ Filter enquiry
+==================================================== NEW ADMISSION
+====================================================
+PERSONAL INFO
+First Name:
+Required
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+2
+Min 2 chars
+Last Name:
+Required
+DOB:
+Required
+Cannot be future date
+Gender:
+Required
+Blood Group:
+Valid blood groups only
+Category:
+Must exist in Master Setup
+Aadhaar:
+Exactly 12 digits
+Unique
+Phone:
+Required
+10 digits
+Email:
+Proper email format
+Unique
+Address:
+Required
+BUSINESS RULES
+Student cannot be admitted twice
+Aadhaar must be unique
+Admission Number auto-generated
+==================================================== GUARDIAN DETAILS
+====================================================
+Father Name:
+Required
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+3
+Father Phone:
+Required
+10 digits
+Father Email:
+Valid email
+Mother Name:
+Required
+Mother Phone:
+10 digits
+==================================================== ACADEMIC INFO
+====================================================
+Class:
+Required
+Must exist in Master Setup
+Section:
+Required
+Must belong to selected class
+Roll Number:
+Required
+Unique within class
+Admission Date:
+Cannot be future date
+==================================================== DOCUMENTS
+====================================================
+Aadhaar:
+Allowed:
+PDF
+JPG
+PNG
+Max Size:
+5 MB
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+4
+Birth Certificate:
+Allowed:
+PDF
+JPG
+PNG
+==================================================== STUDENTS MODULE
+====================================================
+Business Rules:
+Student status:
+Active
+Inactive
+Graduated
+Promotion Rules:
+Cannot promote twice
+Promotion creates new class assignment
+Promotion history maintained
+Test Cases:
+✓ Promote single student ✓ Promote bulk students ✓ Prevent duplicate promotion
+==================================================== STAFF MODULE
+====================================================
+Personal Information
+Name:
+Required
+Email:
+Unique
+Phone:
+Unique
+Department:
+Must exist in Master Setup
+Designation:
+Must exist in Master Setup
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+5
+Experience:
+Numeric only
+Salary Information
+Bank Account:
+Numeric
+IFSC:
+Valid IFSC format
+PAN:
+Valid PAN format
+Business Rules:
+One employee ID per staff member
+Staff email unique
+==================================================== STAFF ATTENDANCE
+====================================================
+Rules:
+One attendance record per staff per day
+Allowed Status:
+Present
+Absent
+Leave
+Late
+Validation:
+Attendance cannot be marked twice
+==================================================== LEAVE MANAGEMENT
+====================================================
+Rules:
+From date <= To date
+Days:
+Auto calculate
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+6
+Status:
+Pending
+Approved
+Rejected
+Business Rules:
+Rejected leave cannot be approved later
+Approved leave affects attendance
+==================================================== PAYROLL
+====================================================
+Salary Formula
+Net Salary:
+Basic Salary
+Allowances
+Deductions
+Validation:
+Salary values >= 0
+Business Rules:
+Salary slip generated once per month
+Prevent duplicate payroll generation
+Test Cases:
+✓ Generate payroll ✓ Download salary slip ✓ View salary slip
+==================================================== STUDENT ATTENDANCE
+====================================================
+Rules:
+One attendance per student per day
+Allowed Status:
+Present
+Absent
+Leave
+Business Rules:
+Attendance cannot be duplicated
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+7
+==================================================== EXAMS
+====================================================
+MARKS ENTRY
+Validations:
+Marks Obtained:
+= 0
+<= Maximum Marks
+Business Rules:
+Marks cannot exceed max marks
+==================================================== RESULTS
+====================================================
+Rules:
+Percentage:
+Auto Calculate
+Result:
+Pass:
+= 33%
+Fail: < 33%
+Grade Rules:
+A+ : 90-100
+A : 80-89
+B : 70-79
+C : 60-69
+D : 50-59
+E : 33-49
+F : Below 33
+• 
+• 
+• 
+8
+==================================================== REPORT CARD
+====================================================
+Validation:
+Report card generated only after result publication
+PDF Includes:
+Student details
+Subject details
+Grades
+Percentage
+Result
+==================================================== FEE COLLECTION
+====================================================
+Validation:
+Paid Amount:
+= 0
+Remaining Amount:
+Auto Calculate
+Business Rules:
+Cannot pay more than total fee
+Receipt auto-generated
+==================================================== FEE STRUCTURE
+====================================================
+Validation:
+All fees:
+= 0
+Discount:
+0 to 100%
+Business Rules:
+One fee structure per class per academic year
+==================================================== MASTER SETUP VALIDATIONS
+====================================================
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+9
+Exam Types
+Unique Exam Name
+Unique Exam Code
+Weightage 0-100
+Class & Sections
+Unique Class + Section
+Subjects
+Unique Subject Code
+Departments
+Unique Department Name
+Designations
+Unique Designation Name
+Categories
+Unique Category Name
+Academic Calendar
+Start Date < End Date
+==================================================== ROLE BASED ACCESS
+====================================================
+Admin:
+Full access
+Teacher:
+Marks Entry
+Attendance
+Student View
+Accountant:
+Fee Collection
+Payroll
+Receptionist:
+Admission
+Enquiry
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+10
+Parent:
+View child details only
+==================================================== FINAL TASK
+====================================================
+For every module generate:
+Validation middleware
+Mongoose schema validation
+Frontend validation
+Error messages
+API tests
+Edge case tests
+Security tests
+Integration tests
+Production readiness checklist
+Provide implementation recommendations before generating code.
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+11

@@ -1,19 +1,17 @@
 import { NavLink, Outlet } from "react-router-dom";
 
 const tabs = [
-  { label: "All Staff", path: "All-Staff" },
-  { label: "Staff Attendance", path: "Staff-Attendance" },
-  { label: "Leave Management", path: "Leave-Management" },
-  { label: "Payroll", path: "Payroll" },
+  { label: "Enquiry", path: "Enquiry" },
+  { label: "New Admission", path: "New-Admission" },
 ];
 
-const Teacher = () => {
+export default function Admission() {
   return (
     <div className="space-y-5 sm:space-y-6">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold">Staff</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">Admission</h1>
         <p className="mt-2 text-sm sm:text-base text-gray-500">
-          Manage staff records, attendance, leave and payroll
+          Manage enquiries and new student admissions
         </p>
       </div>
 
@@ -38,6 +36,4 @@ const Teacher = () => {
       <Outlet />
     </div>
   );
-};
-
-export default Teacher;
+}
