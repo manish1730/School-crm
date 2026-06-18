@@ -3,7 +3,8 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import DashboardLayout from "../layouts/Dasboardlayout";
 import Login from "../pages/Login/Login";
 import Dashboard from "../pages/Dashboard/Dashboard";
-import Student from "../pages/Student/Student";
+import AllStudents from "../pages/Student/AllStudents";
+import Promotion from "../pages/Student/Promotion";
 import Teacher from "../pages/Teacher/Teacher";
 import AllStaff from "../pages/Teacher/AllStaff";
 import StaffAttendance from "../pages/Teacher/StaffAttendance";
@@ -15,6 +16,7 @@ import FeeandFinance from "../pages/Fees/FeeandFinance";
 import Exams from "../pages/Exams/Exams";
 import MarksEntry from "../pages/Exams/MarksEntry";
 import ExamResults from "../pages/Exams/ExamResults";
+import ReportCard from "../pages/Exams/ReportCard";
 import Transport from "../pages/Transport/Transport";
 import Admission from "../pages/Admission/Admission";
 import Enquiry from "../pages/Admission/Enquiry";
@@ -42,11 +44,15 @@ function AppRoutes() {
       <Route element={<ProtectedRoute />}>
       <Route element={<DashboardLayout />}>
         <Route path="/Dashboard" element={<Dashboard />} />
-        <Route path="/Student" element={<Student />} />
-        <Route path="/Teacher" element={<Teacher />}>
+        <Route path="/Students">
+          <Route index element={<Navigate to="All-Students" replace />} />
+          <Route path="All-Students" element={<AllStudents />} />
+          <Route path="Promotion" element={<Promotion />} />
+        </Route>
+        <Route path="/Staff" element={<Teacher />}>
           <Route index element={<Navigate to="All-Staff" replace />} />
           <Route path="All-Staff" element={<AllStaff />} />
-          <Route path="Staff-Attendance" element={<StaffAttendance />} />
+          <Route path="Attendance" element={<StaffAttendance />} />
           <Route path="Leave-Management" element={<LeaveManagement />} />
           <Route path="Payroll" element={<Payroll />} />
         </Route>
@@ -57,7 +63,7 @@ function AppRoutes() {
           <Route index element={<Navigate to="Marks-Entry" replace />} />
           <Route path="Marks-Entry" element={<MarksEntry />} />
           <Route path="Results" element={<ExamResults />} />
-          <Route path="Report-Cards" element={<ExamResults reportMode />} />
+          <Route path="Report-Card" element={<ReportCard />} />
         </Route>
         <Route path="/Transport" element={<Transport />} />
         <Route path="/Admission" element={<Admission />}>
@@ -85,7 +91,14 @@ function AppRoutes() {
       <Route path="/admission" element={<Navigate to="/Admission/New-Admission" replace />} />
       <Route path="/fees" element={<Navigate to="/Fees" replace />} />
       <Route path="/attendance" element={<Navigate to="/Attendence" replace />} />
-      <Route path="/admissions/enquiry" element={<Navigate to="/Student" replace />} />
+      <Route path="/Student" element={<Navigate to="/Students/All-Students" replace />} />
+      <Route path="/Teacher" element={<Navigate to="/Staff/All-Staff" replace />} />
+      <Route path="/Teacher/All-Staff" element={<Navigate to="/Staff/All-Staff" replace />} />
+      <Route path="/Teacher/Staff-Attendance" element={<Navigate to="/Staff/Attendance" replace />} />
+      <Route path="/Teacher/Leave-Management" element={<Navigate to="/Staff/Leave-Management" replace />} />
+      <Route path="/Teacher/Payroll" element={<Navigate to="/Staff/Payroll" replace />} />
+      <Route path="/Exams/Report-Cards" element={<Navigate to="/Exams/Report-Card" replace />} />
+      <Route path="/admissions/enquiry" element={<Navigate to="/Students/All-Students" replace />} />
 
       <Route path="*" element={<Navigate to="/Login" replace />} />
     </Routes>

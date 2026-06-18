@@ -19,6 +19,7 @@ import leaveRoutes from "./routes/leaveRoutes.js";
 import payrollRoutes from "./routes/payrollRoutes.js";
 import studentAttendanceRoutes from "./routes/studentAttendanceRoutes.js";
 import examRoutes from "./routes/examRoutes.js";
+import feeRoutes from "./routes/feeRoutes.js";
 
 dotenv.config();
 
@@ -54,6 +55,7 @@ app.use("/api/leaves", leaveRoutes);
 app.use("/api/payroll", payrollRoutes);
 app.use("/api/student-attendance", studentAttendanceRoutes);
 app.use("/api/exams", examRoutes);
+app.use("/api/fees", feeRoutes);
 
 // Test Route
 app.get("/", (req, res) => {

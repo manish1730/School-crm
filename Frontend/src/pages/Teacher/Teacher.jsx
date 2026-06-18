@@ -1,11 +1,4 @@
-import { NavLink, Outlet } from "react-router-dom";
-
-const tabs = [
-  { label: "All Staff", path: "All-Staff" },
-  { label: "Staff Attendance", path: "Staff-Attendance" },
-  { label: "Leave Management", path: "Leave-Management" },
-  { label: "Payroll", path: "Payroll" },
-];
+import { Outlet } from "react-router-dom";
 
 const Teacher = () => {
   return (
@@ -15,24 +8,6 @@ const Teacher = () => {
         <p className="mt-2 text-sm sm:text-base text-gray-500">
           Manage staff records, attendance, leave and payroll
         </p>
-      </div>
-
-      <div className="rounded-2xl bg-gray-100 p-2 overflow-x-auto">
-        <div className="flex min-w-max gap-2">
-          {tabs.map((tab) => (
-            <NavLink
-              key={tab.path}
-              to={tab.path}
-              className={({ isActive }) =>
-                `whitespace-nowrap rounded-xl px-4 py-2 text-sm sm:text-base transition-all ${
-                  isActive ? "bg-white text-blue-900 shadow font-semibold" : "text-gray-600 hover:bg-gray-200"
-                }`
-              }
-            >
-              {tab.label}
-            </NavLink>
-          ))}
-        </div>
       </div>
 
       <Outlet />

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   FaHome,
   FaUserGraduate,
@@ -19,7 +19,7 @@ import { NavLink, useLocation,useNavigate} from "react-router-dom";
 import logo from "../assets/logo.png";
 
 const Sidebar = ({ mobileOpen = false, onClose = () => {} }) => {
-  const navigate = useNavigate();
+  const location = useLocation();
   const menu = [
     { icon: <FaHome />, name: "Dashboard", path: "/Dashboard" },
     {
@@ -30,12 +30,36 @@ const Sidebar = ({ mobileOpen = false, onClose = () => {} }) => {
         { icon: <FaUserPlus />, name: "New Admission", path: "/Admission/New-Admission" },
       ],
     },
-    { icon: <FaUserGraduate />, name: "Students", path: "/Student" },
-    { icon: <FaChalkboardTeacher />, name: "Teachers", path: "/Teacher" },
+    {
+      icon: <FaUserGraduate />,
+      name: "Students",
+      subRoutes: [
+        { icon: <FaUserGraduate />, name: "All Students", path: "/Students/All-Students" },
+        { icon: <FaUserGraduate />, name: "Promotion", path: "/Students/Promotion" },
+      ],
+    },
+    {
+      icon: <FaChalkboardTeacher />,
+      name: "Staff",
+      subRoutes: [
+        { icon: <FaChalkboardTeacher />, name: "All Staff", path: "/Staff/All-Staff" },
+        { icon: <FaChalkboardTeacher />, name: "Staff Attendance", path: "/Staff/Attendance" },
+        { icon: <FaChalkboardTeacher />, name: "Leave Management", path: "/Staff/Leave-Management" },
+        { icon: <FaChalkboardTeacher />, name: "Payroll", path: "/Staff/Payroll" },
+      ],
+    },
     { icon: <FaClipboardCheck />, name: "Attendance", path: "/Attendence" },
     { icon: <FaCalendarAlt />, name: "Timetable", path: "/Timetable" },
     { icon: <FaMoneyBill />, name: "Fees & Finance", path: "/Fees" },
-    { icon: <FaFileAlt />, name: "Exams", path: "/Exams" },
+    {
+      icon: <FaFileAlt />,
+      name: "Exams",
+      subRoutes: [
+        { icon: <FaFileAlt />, name: "Marks Entry", path: "/Exams/Marks-Entry" },
+        { icon: <FaFileAlt />, name: "Exam Results", path: "/Exams/Results" },
+        { icon: <FaFileAlt />, name: "Report Card", path: "/Exams/Report-Card" },
+      ],
+    },
     { icon: <FaBus />, name: "Transport", path: "/Transport" },
     {
       icon: <FaCog />,
@@ -49,14 +73,10 @@ const Sidebar = ({ mobileOpen = false, onClose = () => {} }) => {
       ],
     },
   ];
-   const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/Login");
-  };
   return (
     <>
       <div className="hidden md:flex md:w-[280px] md:fixed md:left-0 md:top-0 md:h-screen md:min-h-screen bg-[#06123f] text-white p-5 flex-col overflow-y-auto">
-        <SidebarContent menu={menu} />
+        <SidebarContent key={`desktop-${location.pathname}`} menu={menu} />
       </div>
 
       {mobileOpen ? (
@@ -67,7 +87,7 @@ const Sidebar = ({ mobileOpen = false, onClose = () => {} }) => {
             onClick={onClose}
           />
           <div className="relative z-50 h-full w-[280px] max-w-[85vw] bg-[#06123f] text-white p-4 flex flex-col overflow-y-auto shadow-2xl">
-            <SidebarContent menu={menu} />
+            <SidebarContent key={`mobile-${location.pathname}`} menu={menu} />
           </div>
         </div>
       ) : null}
@@ -84,11 +104,6 @@ const SidebarContent = ({ menu }) => {
   const [openDropdown, setOpenDropdown] = useState(
     activeDropdownIndex === -1 ? null : activeDropdownIndex
   );
-  useEffect(() => {
-    if (activeDropdownIndex !== -1) {
-      setOpenDropdown(activeDropdownIndex);
-    }
-  }, [activeDropdownIndex]);
   const handleLogout = () => {
   localStorage.removeItem("token");
   navigate("/Login");
