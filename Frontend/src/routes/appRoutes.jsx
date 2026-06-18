@@ -57,7 +57,6 @@ function AppRoutes() {
           <Route path="Payroll" element={<Payroll />} />
         </Route>
         <Route path="/Attendence" element={<Attendence />} />
-        <Route path="/Timetable" element={<Timetable />} />
         <Route path="/Fees" element={<FeeandFinance />} />
         <Route path="/Exams" element={<Exams />}>
           <Route index element={<Navigate to="Marks-Entry" replace />} />
@@ -65,15 +64,14 @@ function AppRoutes() {
           <Route path="Results" element={<ExamResults />} />
           <Route path="Report-Card" element={<ReportCard />} />
         </Route>
-        <Route path="/Transport" element={<Transport />} />
         <Route path="/Admission" element={<Admission />}>
           <Route index element={<Navigate to="Enquiry" replace />} />
           <Route path="Enquiry" element={<Enquiry />} />
           <Route path="New-Admission" element={<NewAdmission />} />
         </Route>
         <Route path="/Settings" element={<Setting />} />
-        <Route path="/Settings/Audit-Logs" element={<AuditLogs />} />
-        <Route path="/Settings/Integration" element={<Integrations />} />
+        
+      
         <Route path="/Settings/School-Profile" element={<SchoolProfile />} />
         <Route path="/Settings/Masters" element={<Masters />}>
           <Route index element={<Navigate to="Academic-Years" replace />} />

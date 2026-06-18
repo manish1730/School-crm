@@ -75,7 +75,6 @@ const feePaymentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-feePaymentSchema.index({ receiptNumber: 1 }, { unique: true });
 feePaymentSchema.index(
   { transactionReference: 1 },
   {

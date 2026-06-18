@@ -1,5 +1,7 @@
 import cors from "cors";
 import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
 import authRoutes from "./routes/authRoutes.js";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
@@ -20,12 +22,16 @@ import payrollRoutes from "./routes/payrollRoutes.js";
 import studentAttendanceRoutes from "./routes/studentAttendanceRoutes.js";
 import examRoutes from "./routes/examRoutes.js";
 import feeRoutes from "./routes/feeRoutes.js";
+import schoolProfileRoutes from "./routes/schoolProfileRoutes.js";
 
 dotenv.config();
 
 connectDB();
 
 const app = express();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 app.use(
   cors({
@@ -36,6 +42,7 @@ app.use(
 
 // Middleware
 app.use(express.json());
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Routes
 app.use("/api/auth", authRoutes);
@@ -56,6 +63,7 @@ app.use("/api/payroll", payrollRoutes);
 app.use("/api/student-attendance", studentAttendanceRoutes);
 app.use("/api/exams", examRoutes);
 app.use("/api/fees", feeRoutes);
+app.use("/api/school-profile", schoolProfileRoutes);
 
 // Test Route
 app.get("/", (req, res) => {

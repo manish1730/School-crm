@@ -49,7 +49,6 @@ const Sidebar = ({ mobileOpen = false, onClose = () => {} }) => {
       ],
     },
     { icon: <FaClipboardCheck />, name: "Attendance", path: "/Attendence" },
-    { icon: <FaCalendarAlt />, name: "Timetable", path: "/Timetable" },
     { icon: <FaMoneyBill />, name: "Fees & Finance", path: "/Fees" },
     {
       icon: <FaFileAlt />,
@@ -60,14 +59,11 @@ const Sidebar = ({ mobileOpen = false, onClose = () => {} }) => {
         { icon: <FaFileAlt />, name: "Report Card", path: "/Exams/Report-Card" },
       ],
     },
-    { icon: <FaBus />, name: "Transport", path: "/Transport" },
+
     {
       icon: <FaCog />,
       name: "Settings",
       subRoutes: [
-        { icon: <FaCog />, name: "Overview", path: "/Settings" },
-        { icon: <FaCog />, name: "Audit Logs", path: "/Settings/Audit-Logs" },
-        { icon: <FaCog />, name: "Integration", path: "/Settings/Integration" },
         { icon: <FaCog />, name: "Masters", path: "/Settings/Masters" },
         { icon: <FaCog />, name: "School Profile", path: "/Settings/School-Profile" },
       ],

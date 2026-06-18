@@ -44,7 +44,6 @@ const feeReceiptSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-feeReceiptSchema.index({ receiptNumber: 1 }, { unique: true });
 feeReceiptSchema.index({ paymentId: 1 }, { unique: true });
 feeReceiptSchema.index({ studentId: 1, issuedAt: -1 });
 
