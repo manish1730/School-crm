@@ -1,4 +1,136 @@
+import { useState, useEffect } from "react";
+import { classSectionService } from "../../services/masterSetupServices";
+import { getStudents, promoteStudents } from "../../services/studentService";
+
 const Promotion = () => {
+  const [classSections, setClassSections] = useState([]);
+  const [fromClass, setFromClass] = useState("");
+  const [fromSection, setFromSection] = useState("");
+  const [toClass, setToClass] = useState("");
+  const [toSection, setToSection] = useState("");
+  const [students, setStudents] = useState([]);
+  const [selected, setSelected] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [promoting, setPromoting] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  useEffect(() => {
+    const fetchClassSections = async () => {
+      try {
+        const response = await classSectionService.getAll();
+        setClassSections(response.data.data || []);
+      } catch (err) {
+        setError("Failed to load class data");
+      }
+    };
+    fetchClassSections();
+  }, []);
+
+  const uniqueClasses = [...new Set(classSections.map((cs) => cs.className))];
+
+  const getSections = (className) =>
+    classSections
+      .filter((cs) => cs.className === className)
+      .map((cs) => cs.sectionName);
+
+  useEffect(() => {
+    setFromSection("");
+    setStudents([]);
+    setSelected([]);
+  }, [fromClass]);
+
+  useEffect(() => {
+    if (!fromClass || !fromSection) {
+      setStudents([]);
+      setSelected([]);
+      return;
+    }
+    const fetchStudents = async () => {
+      try {
+        setLoading(true);
+        setError("");
+        const response = await getStudents({
+          className: fromClass,
+          sectionName: fromSection,
+        });
+        setStudents(response.data.data || []);
+        setSelected([]);
+      } catch (err) {
+        setError("Failed to load students");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStudents();
+  }, [fromClass, fromSection]);
+
+  useEffect(() => {
+    setToSection("");
+  }, [toClass]);
+
+  const toggleSelect = (id) => {
+    setSelected((prev) =>
+      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
+    );
+  };
+
+  const toggleAll = () => {
+    if (selected.length === students.length) {
+      setSelected([]);
+    } else {
+      setSelected(students.map((s) => s._id));
+    }
+  };
+
+  const handlePromote = async () => {
+    setError("");
+    setSuccess("");
+
+    if (!fromClass || !fromSection) {
+      setError("Please select From Class and Section");
+      return;
+    }
+    if (!toClass || !toSection) {
+      setError("Please select To Class and Section");
+      return;
+    }
+    if (fromClass === toClass && fromSection === toSection) {
+      setError("Cannot promote student to same class and section");
+      return;
+    }
+    if (selected.length === 0) {
+      setError("Please select at least one student");
+      return;
+    }
+
+    try {
+      setPromoting(true);
+      const response = await promoteStudents({
+        fromClass,
+        fromSection,
+        toClass,
+        toSection,
+        studentIds: selected,
+      });
+      setSuccess(response.data.message || "Student promoted successfully");
+      setSelected([]);
+
+      // Refresh student list
+      const res = await getStudents({
+        className: fromClass,
+        sectionName: fromSection,
+      });
+      setStudents(res.data.data || []);
+    } catch (err) {
+      setError(
+        err?.response?.data?.message || "Failed to promote students"
+      );
+    } finally {
+      setPromoting(false);
+    }
+  };
+
   return (
     <div className="space-y-4 md:space-y-6">
       <div>
@@ -8,28 +140,158 @@ const Promotion = () => {
         </p>
       </div>
 
+      {error && (
+        <div className="p-3 rounded-lg bg-red-100 text-red-600 text-sm">
+          {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="p-3 rounded-lg bg-green-100 text-green-700 text-sm">
+          {success}
+        </div>
+      )}
+
       <div className="rounded-2xl bg-white p-4 shadow-sm">
         <div className="grid gap-3 md:grid-cols-4">
-          <select className="w-full bg-gray-100 rounded-lg px-4 py-3 outline-none">
-            <option>From Class</option>
+          <select
+            value={fromClass}
+            onChange={(e) => setFromClass(e.target.value)}
+            className="w-full bg-gray-100 rounded-lg px-4 py-3 outline-none"
+          >
+            <option value="">From Class</option>
+            {uniqueClasses.map((cls) => (
+              <option key={cls} value={cls}>
+                {cls}
+              </option>
+            ))}
           </select>
-          <select className="w-full bg-gray-100 rounded-lg px-4 py-3 outline-none">
-            <option>From Section</option>
+
+          <select
+            value={fromSection}
+            onChange={(e) => setFromSection(e.target.value)}
+            className="w-full bg-gray-100 rounded-lg px-4 py-3 outline-none"
+            disabled={!fromClass}
+          >
+            <option value="">From Section</option>
+            {getSections(fromClass).map((sec) => (
+              <option key={sec} value={sec}>
+                {sec}
+              </option>
+            ))}
           </select>
-          <select className="w-full bg-gray-100 rounded-lg px-4 py-3 outline-none">
-            <option>To Class</option>
+
+          <select
+            value={toClass}
+            onChange={(e) => setToClass(e.target.value)}
+            className="w-full bg-gray-100 rounded-lg px-4 py-3 outline-none"
+          >
+            <option value="">To Class</option>
+            {uniqueClasses.map((cls) => (
+              <option key={cls} value={cls}>
+                {cls}
+              </option>
+            ))}
           </select>
-          <select className="w-full bg-gray-100 rounded-lg px-4 py-3 outline-none">
-            <option>To Section</option>
+
+          <select
+            value={toSection}
+            onChange={(e) => setToSection(e.target.value)}
+            className="w-full bg-gray-100 rounded-lg px-4 py-3 outline-none"
+            disabled={!toClass}
+          >
+            <option value="">To Section</option>
+            {getSections(toClass).map((sec) => (
+              <option key={sec} value={sec}>
+                {sec}
+              </option>
+            ))}
           </select>
         </div>
 
         <div className="mt-4 flex justify-end">
-          <button className="bg-blue-900 text-white px-6 py-2 rounded-lg">
-            Promote
+          <button
+            onClick={handlePromote}
+            disabled={promoting}
+            className="bg-blue-900 text-white px-6 py-2 rounded-lg disabled:opacity-50"
+          >
+            {promoting ? "Promoting..." : "Promote"}
           </button>
         </div>
       </div>
+
+      {loading && (
+        <div className="text-center text-gray-500 py-8">Loading students...</div>
+      )}
+
+      {!loading && fromClass && fromSection && (
+        <div className="rounded-2xl bg-white p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">
+              Students — {fromClass} - {fromSection}
+              <span className="text-sm font-normal text-gray-500 ml-2">
+                ({students.length} found, {selected.length} selected)
+              </span>
+            </h2>
+          </div>
+
+          {students.length === 0 ? (
+            <p className="text-gray-500 text-sm">No students found in this class/section.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="p-3 text-left">
+                      <input
+                        type="checkbox"
+                        checked={selected.length === students.length && students.length > 0}
+                        onChange={toggleAll}
+                        className="rounded"
+                      />
+                    </th>
+                    <th className="p-3 text-left">#</th>
+                    <th className="p-3 text-left">Student Name</th>
+                    <th className="p-3 text-left">Roll Number</th>
+                    <th className="p-3 text-left">Admission No</th>
+                    <th className="p-3 text-left">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {students.map((student, index) => (
+                    <tr
+                      key={student._id}
+                      className={`border-b hover:bg-gray-50 ${
+                        selected.includes(student._id) ? "bg-blue-50" : ""
+                      }`}
+                    >
+                      <td className="p-3">
+                        <input
+                          type="checkbox"
+                          checked={selected.includes(student._id)}
+                          onChange={() => toggleSelect(student._id)}
+                          className="rounded"
+                        />
+                      </td>
+                      <td className="p-3">{index + 1}</td>
+                      <td className="p-3 font-medium">
+                        {student.firstName} {student.lastName}
+                      </td>
+                      <td className="p-3">{student.rollNumber}</td>
+                      <td className="p-3">{student.admissionNumber}</td>
+                      <td className="p-3">
+                        <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-700">
+                          {student.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

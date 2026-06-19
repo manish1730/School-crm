@@ -237,3 +237,55 @@ export const deleteAcademicYear = async (
 
   }
 };
+
+// Set Current Academic Year
+export const setCurrentAcademicYear = async (
+  req,
+  res
+) => {
+  try {
+
+    const { id } = req.params;
+
+    const year =
+      await Academicyear.findOne({
+        _id: id,
+        isActive: true,
+      });
+
+    if (!year) {
+      return res.status(404).json({
+        success: false,
+        message:
+          "Academic Year not found",
+      });
+    }
+
+    // Unset isCurrent on all other years
+    await Academicyear.updateMany(
+      { isActive: true },
+      { isCurrent: false }
+    );
+
+    // Set isCurrent on selected year
+    year.isCurrent = true;
+    await year.save();
+
+    res.status(200).json({
+      success: true,
+      message:
+        "Current academic year updated successfully",
+      data: year,
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+
+  }
+};

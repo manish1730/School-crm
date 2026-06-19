@@ -44,3 +44,10 @@ export const deleteAcademicYear = (id) =>
     `${API}/${id}`,
     getAuthConfig()
   );
+
+export const setCurrentAcademicYear = (id) =>
+  axios.put(
+    `${API}/set-current/${id}`,
+    {},
+    getAuthConfig()
+  );

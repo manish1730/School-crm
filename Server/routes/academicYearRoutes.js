@@ -4,6 +4,7 @@ import{
     createAcademicYear,
     deleteAcademicYear,
     getAcademicYear,
+    setCurrentAcademicYear,
     updateAcademicYear,
 } from "../controllers/academicYearController.js"
 
@@ -19,6 +20,11 @@ router.get(
     authMiddleware,
     getAcademicYear
 )
+router.put(
+  "/set-current/:id",
+  authMiddleware,
+  setCurrentAcademicYear
+);
 router.put(
   "/:id",
   authMiddleware,

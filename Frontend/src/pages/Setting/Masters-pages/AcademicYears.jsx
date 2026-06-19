@@ -6,12 +6,13 @@ import {
  createAcademicYear,
  updateAcademicYear,
  deleteAcademicYear,
+ setCurrentAcademicYear,
 } from "../../../services/academicYearServices";
 
 export default function AcademicYears() {
   const [academicYears, setAcademicYears] = useState([]);
 
-  const [currentYear, setCurrentYear] = useState("2025-26");
+  const [currentYear, setCurrentYear] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -24,9 +25,14 @@ export default function AcademicYears() {
     const response =
       await getAcademicYears();
 
-    setAcademicYears(
-      response.data.data
-    );
+    const years = response.data.data || [];
+    setAcademicYears(years);
+    const current = years.find((y) => y.isCurrent);
+    if (current) {
+      setCurrentYear(current.name);
+    } else if (years.length > 0) {
+      setCurrentYear(years[0].name);
+    }
 
   } catch (error) {
 
@@ -239,7 +245,21 @@ const handleEdit = (year) => {
           <div className="flex gap-3">
             <select
               value={currentYear}
-              onChange={(e) => setCurrentYear(e.target.value)}
+              onChange={async (e) => {
+                const selectedName = e.target.value;
+                const selectedYear = academicYears.find((y) => y.name === selectedName);
+                if (!selectedYear) return;
+                try {
+                  setError("");
+                  setSuccessMessage("");
+                  await setCurrentAcademicYear(selectedYear._id);
+                  setCurrentYear(selectedName);
+                  setSuccessMessage("Current academic year updated successfully");
+                  await fetchAcademicYears();
+                } catch (err) {
+                  setError(err?.response?.data?.message || "Failed to update current year");
+                }
+              }}
               className="bg-gray-100 rounded-lg px-3 py-2 text-sm flex-1 outline-none"
             >
               {academicYears.map((year) => (

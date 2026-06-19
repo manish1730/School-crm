@@ -264,3 +264,90 @@ export const deleteStudent = async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to delete student" });
   }
 };
+
+// Promote Students
+export const promoteStudents = async (req, res) => {
+  try {
+    const { fromClass, fromSection, toClass, toSection, studentIds } = req.body;
+
+    if (!fromClass || !fromSection || !toClass || !toSection) {
+      return res.status(400).json({
+        success: false,
+        message: "From and To class/section are required",
+      });
+    }
+
+    if (!studentIds || !studentIds.length) {
+      return res.status(400).json({
+        success: false,
+        message: "Please select at least one student",
+      });
+    }
+
+    if (fromClass === toClass && fromSection === toSection) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot promote student to same class and section",
+      });
+    }
+
+    // Validate destination class exists
+    const destinationClass = await ClassSection.findOne({
+      className: toClass,
+      sectionName: toSection,
+      isActive: true,
+    });
+
+    if (!destinationClass) {
+      return res.status(400).json({
+        success: false,
+        message: "Destination class does not exist",
+      });
+    }
+
+    // Validate all students are active
+    const students = await Student.find({
+      _id: { $in: studentIds },
+      isActive: true,
+      status: "Active",
+    });
+
+    if (students.length !== studentIds.length) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot promote inactive student",
+      });
+    }
+
+    // Promote each student
+    const promoted = await Student.updateMany(
+      { _id: { $in: studentIds } },
+      {
+        $set: {
+          className: toClass,
+          sectionName: toSection,
+          updatedBy: req.user?.id,
+        },
+      }
+    );
+
+    await logActivity({
+      action: "PROMOTE",
+      module: "Student",
+      description: `${promoted.modifiedCount} student(s) promoted from ${fromClass}-${fromSection} to ${toClass}-${toSection}`,
+      performedBy: req.user?.id,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Student promoted successfully",
+      count: promoted.modifiedCount,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to promote students",
+    });
+  }
+};

@@ -22,3 +22,6 @@ export const updateStudent = (id, data) =>
 
 export const deleteStudent = (id) =>
   axios.delete(`${API}/${id}`, getAuthConfig());
+
+export const promoteStudents = (data) =>
+  axios.post(`${API}/promote`, data, getAuthConfig());
