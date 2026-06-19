@@ -10,6 +10,7 @@ import FeeReceipt from "../models/FeeReceipt.js";
 import FeeStructure from "../models/FeeStructure.js";
 import Student from "../models/Student.js";
 import StudentFee from "../models/StudentFee.js";
+import { logActivity } from "../utils/activityLogger.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -797,6 +798,8 @@ export const recordFeePayment = async (req, res) => {
       createdBy: req.user?.id,
       updatedBy: req.user?.id,
     });
+
+    await logActivity("Fee Collected", `Fee payment of ₹${payment.amountPaid} received for student (Receipt: ${payment.receiptNumber}).`, req);
 
     res.status(201).json({
       success: true,

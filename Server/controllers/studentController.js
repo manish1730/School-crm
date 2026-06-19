@@ -1,6 +1,7 @@
 import Student from "../models/Student.js";
 import Category from "../models/Category.js";
 import ClassSection from "../models/ClassSection.js";
+import { logActivity } from "../utils/activityLogger.js";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -164,6 +165,9 @@ export const createStudent = async (req, res) => {
       createdBy: req.user?.id,
       updatedBy: req.user?.id,
     });
+
+    await logActivity("Student Created", `New student ${student.firstName} ${student.lastName} was added to the system.`, req);
+    await logActivity("Admission Created", `New admission created for student ${student.firstName} ${student.lastName} with Admission No. ${student.admissionNumber}.`, req);
 
     res.status(201).json({
       success: true,

@@ -3,6 +3,7 @@ import Student from "../models/Student.js";
 import ClassSection from "../models/ClassSection.js";
 import ExamType from "../models/ExamType.js";
 import Subject from "../models/Subject.js";
+import { logActivity } from "../utils/activityLogger.js";
 
 const getGrade = (percentage) => {
   if (percentage >= 90) return "A+";
@@ -85,6 +86,8 @@ export const saveMarks = async (req, res) => {
     }));
 
     await ExamMark.bulkWrite(operations);
+
+    await logActivity("Exam Result Generated", `Exam marks submitted for ${examType} - ${subject} in class ${className} - ${sectionName}.`, req);
 
     res.status(200).json({ success: true, message: "Marks saved successfully", data: {} });
   } catch (error) {

@@ -1,5 +1,6 @@
 import Student from "../models/Student.js";
 import StudentAttendance from "../models/StudentAttendance.js";
+import { logActivity } from "../utils/activityLogger.js";
 
 export const getStudentAttendance = async (req, res) => {
   try {
@@ -72,6 +73,8 @@ export const saveStudentAttendance = async (req, res) => {
         updatedBy: req.user?.id,
       }))
     );
+
+    await logActivity("Attendance Marked", `Attendance marked for class ${className} - ${sectionName} on ${attendanceDate}.`, req);
 
     res.status(201).json({
       success: true,

@@ -1,6 +1,7 @@
 import Staff from "../models/Staff.js";
 import Department from "../models/Department.js";
 import Designation from "../models/Designation.js";
+import { logActivity } from "../utils/activityLogger.js";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const ifscRegex = /^[A-Z]{4}0[A-Z0-9]{6}$/;
@@ -101,6 +102,8 @@ export const createStaff = async (req, res) => {
       createdBy: req.user?.id,
       updatedBy: req.user?.id,
     });
+
+    await logActivity("Staff Created", `New staff member ${staff.fullName} was added to the system (Employee ID: ${staff.employeeId}).`, req);
 
     res.status(201).json({ success: true, message: "Staff created successfully", data: staff });
   } catch (error) {

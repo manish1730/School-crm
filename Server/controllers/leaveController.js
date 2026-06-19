@@ -1,4 +1,5 @@
 import LeaveRequest from "../models/LeaveRequest.js";
+import { logActivity } from "../utils/activityLogger.js";
 
 export const getLeaveRequests = async (req, res) => {
   try {
@@ -42,6 +43,11 @@ export const updateLeaveStatus = async (req, res) => {
     current.status = status;
     current.updatedBy = req.user?.id;
     await current.save();
+
+    if (status === "Approved") {
+      await logActivity("Leave Approved", `Leave request of type ${current.leaveType} for ${current.days} day(s) was approved.`, req);
+    }
+
     res.status(200).json({ success: true, message: `Leave ${status.toLowerCase()} successfully`, data: current });
   } catch (error) {
     res.status(500).json({ success: false, message: "Failed to update leave status" });
