@@ -4,7 +4,7 @@ import * as schoolProfileService from "../services/schoolProfileService.js";
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Helper to validate URL format
-const urlRegex = /^https?:\/\/[^\s$.?#].[^\s]*$/i;
+const urlRegex = /^(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{2,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/i;
 
 // Helper to validate letters and spaces only
 const lettersOnlyRegex = /^[A-Za-z\s]+$/;
@@ -195,10 +195,22 @@ const verifyAdmin = (req, res) => {
   return true;
 };
 
+// Check for Admin or Staff read access helper
+const verifyReadAccess = (req, res) => {
+  if (!["Admin", "Staff"].includes(req.user?.role)) {
+    res.status(403).json({
+      success: false,
+      message: "Only Admin Can Access This Resource",
+    });
+    return false;
+  }
+  return true;
+};
+
 // 1. Get School Profile
 export const getSchoolProfile = async (req, res) => {
   try {
-    if (!verifyAdmin(req, res)) return;
+    if (!verifyReadAccess(req, res)) return;
 
     const profile = await schoolProfileService.getSchoolProfile();
     
@@ -224,6 +236,14 @@ export const createSchoolProfile = async (req, res) => {
     // Frontend handles converting Short Name to Uppercase, but backend enforces/does it too
     if (req.body.shortName) {
       req.body.shortName = req.body.shortName.trim().toUpperCase();
+    }
+
+    if (req.body.website) {
+      let web = req.body.website.trim();
+      if (web && !/^https?:\/\//i.test(web)) {
+        web = `https://${web}`;
+      }
+      req.body.website = web;
     }
 
     const validationError = validateSchoolProfile(req.body);
@@ -283,6 +303,14 @@ export const updateSchoolProfile = async (req, res) => {
 
     if (req.body.shortName) {
       req.body.shortName = req.body.shortName.trim().toUpperCase();
+    }
+
+    if (req.body.website) {
+      let web = req.body.website.trim();
+      if (web && !/^https?:\/\//i.test(web)) {
+        web = `https://${web}`;
+      }
+      req.body.website = web;
     }
 
     const validationError = validateSchoolProfile(req.body, true);

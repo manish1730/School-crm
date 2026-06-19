@@ -143,13 +143,13 @@ async function runTests() {
     // --- TEST CASE 2: Role Protection ---
     console.log("\n--- Test Case 2: Role Protection ---");
     
-    // GET by Staff
+    // GET by Staff (allowed read access)
     const resStaffGet = await fetch(BASE_URL, {
       headers: { Authorization: `Bearer ${staffToken}` },
     });
-    assertEqual(resStaffGet.status, 403, "GET by Staff rejects with 403");
+    assertEqual(resStaffGet.status, 200, "GET by Staff allows access with 200");
     const jsonStaffGet = await resStaffGet.json();
-    assertEqual(jsonStaffGet.message, "Only Admin Can Access This Resource", "GET by Staff message is correct");
+    assertEqual(jsonStaffGet.message, "Profile fetched successfully", "GET by Staff message is correct");
 
     // POST by Staff
     const resStaffPost = await fetch(BASE_URL, {

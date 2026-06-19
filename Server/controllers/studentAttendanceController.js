@@ -49,36 +49,35 @@ export const saveStudentAttendance = async (req, res) => {
     }
 
     const day = new Date(attendanceDate);
-    const duplicate = await StudentAttendance.findOne({
-      attendanceDate: day,
-      studentId: { $in: entries.map((entry) => entry.studentId) },
-      isActive: true,
-    });
-
-    if (duplicate) {
-      return res.status(400).json({
-        success: false,
-        message: "Attendance cannot be duplicated",
-      });
+    const records = [];
+    for (const entry of entries) {
+      const record = await StudentAttendance.findOneAndUpdate(
+        {
+          studentId: entry.studentId,
+          attendanceDate: day,
+          isActive: true,
+        },
+        {
+          $set: {
+            className,
+            sectionName,
+            status: entry.status,
+            updatedBy: req.user?.id,
+          },
+          $setOnInsert: {
+            createdBy: req.user?.id,
+          }
+        },
+        { upsert: true, new: true }
+      );
+      records.push(record);
     }
-
-    const records = await StudentAttendance.insertMany(
-      entries.map((entry) => ({
-        studentId: entry.studentId,
-        className,
-        sectionName,
-        attendanceDate: day,
-        status: entry.status,
-        createdBy: req.user?.id,
-        updatedBy: req.user?.id,
-      }))
-    );
 
     await logActivity("Attendance Marked", `Attendance marked for class ${className} - ${sectionName} on ${attendanceDate}.`, req);
 
-    res.status(201).json({
+    res.status(200).json({
       success: true,
-      message: "Student attendance saved successfully",
+      message: "Attendance updated successfully",
       data: records,
     });
   } catch (error) {

@@ -26,11 +26,6 @@ const subjectSchema = new mongoose.Schema(
         message: "At least one class must be selected",
       },
     },
-    department: {
-      type: String,
-      trim: true,
-      default: "",
-    },
     description: {
       type: String,
       trim: true,

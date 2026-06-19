@@ -27,12 +27,12 @@ const validate = ({
   if (!className) return "Class Name is required";
   if (!classCode) return "Class Code is required";
   if (!sectionName) return "Section Name is required";
-  if (!sectionCapacity) return "Section Capacity is required";
-  if (Number.isNaN(Number(sectionCapacity))) {
-    return "Section Capacity must be numeric only";
+  if (sectionCapacity === undefined || sectionCapacity === null || sectionCapacity === "") {
+    return "Capacity must be greater than 0";
   }
-  if (Number(sectionCapacity) <= 0) {
-    return "Section Capacity must be greater than 0";
+  const capacityNum = Number(sectionCapacity);
+  if (Number.isNaN(capacityNum) || capacityNum <= 0) {
+    return "Capacity must be greater than 0";
   }
   return null;
 };

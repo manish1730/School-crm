@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   FaHome,
   FaUserGraduate,
@@ -15,11 +15,36 @@ import {
   FaUserPlus,
 } from "react-icons/fa";
 import { NavLink, useLocation,useNavigate} from "react-router-dom";
+import { getAcademicYears } from "../services/academicYearServices";
 
 import logo from "../assets/logo.png";
 
 const Sidebar = ({ mobileOpen = false, onClose = () => {} }) => {
   const location = useLocation();
+  const [activeYearName, setActiveYearName] = useState("Loading...");
+
+  useEffect(() => {
+    const fetchActiveYear = async () => {
+      try {
+        const response = await getAcademicYears();
+        const years = response.data.data || [];
+        const currentYear = years.find((y) => y.isCurrent) || years[0];
+        if (currentYear) {
+          setActiveYearName(currentYear.name);
+        } else {
+          setActiveYearName("N/A");
+        }
+      } catch (err) {
+        console.error("Failed to fetch active academic year", err);
+        setActiveYearName("Error");
+      }
+    };
+
+    fetchActiveYear();
+    const interval = setInterval(fetchActiveYear, 5000); // poll every 5 seconds to stay updated dynamically
+    return () => clearInterval(interval);
+  }, []);
+
   const menu = [
     { icon: <FaHome />, name: "Dashboard", path: "/Dashboard" },
     {
@@ -72,7 +97,7 @@ const Sidebar = ({ mobileOpen = false, onClose = () => {} }) => {
   return (
     <>
       <div className="hidden md:flex md:w-[280px] md:fixed md:left-0 md:top-0 md:h-screen md:min-h-screen bg-[#06123f] text-white p-5 flex-col overflow-y-auto">
-        <SidebarContent key={`desktop-${location.pathname}`} menu={menu} />
+        <SidebarContent key={`desktop-${location.pathname}`} menu={menu} activeYearName={activeYearName} />
       </div>
 
       {mobileOpen ? (
@@ -83,7 +108,7 @@ const Sidebar = ({ mobileOpen = false, onClose = () => {} }) => {
             onClick={onClose}
           />
           <div className="relative z-50 h-full w-[280px] max-w-[85vw] bg-[#06123f] text-white p-4 flex flex-col overflow-y-auto shadow-2xl">
-            <SidebarContent key={`mobile-${location.pathname}`} menu={menu} />
+            <SidebarContent key={`mobile-${location.pathname}`} menu={menu} activeYearName={activeYearName} />
           </div>
         </div>
       ) : null}
@@ -91,7 +116,7 @@ const Sidebar = ({ mobileOpen = false, onClose = () => {} }) => {
   );
 };
 
-const SidebarContent = ({ menu }) => {
+const SidebarContent = ({ menu, activeYearName }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const activeDropdownIndex = menu.findIndex((item) =>
@@ -178,7 +203,7 @@ const SidebarContent = ({ menu }) => {
           📅
         </div>
         <p className="text-gray-300 text-xs md:text-sm tracking-wider">ACADEMIC YEAR</p>
-        <h2 className="text-2xl md:text-3xl font-bold mt-2">2026-27</h2>
+        <h2 className="text-2xl md:text-3xl font-bold mt-2">{activeYearName || "N/A"}</h2>
         <div className="flex items-center gap-2 mt-4">
           <span className="w-2 h-2 rounded-full bg-green-500" />
           <span className="text-sm text-gray-300">Active Session</span>

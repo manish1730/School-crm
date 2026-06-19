@@ -15,7 +15,6 @@ const columns = [
     label: "Applicable Classes",
     render: (record) => record.applicableClasses?.join(", ") || "-",
   },
-  { key: "department", label: "Department" },
 ];
 
 const validate = ({
@@ -35,14 +34,10 @@ const validate = ({
 
 export default function Subjects() {
   const [classOptions, setClassOptions] = useState([]);
-  const [departmentOptions, setDepartmentOptions] = useState([]);
 
   useEffect(() => {
     const fetchOptions = async () => {
-      const [classes, departments] = await Promise.all([
-        classSectionService.getAll(),
-        departmentService.getAll(),
-      ]);
+      const classes = await classSectionService.getAll();
 
       setClassOptions(
         (classes.data.data || []).map((item) => ({
@@ -50,18 +45,10 @@ export default function Subjects() {
           value: `${item.className} - ${item.sectionName}`,
         }))
       );
-
-      setDepartmentOptions(
-        (departments.data.data || []).map((item) => ({
-          label: item.departmentName,
-          value: item.departmentName,
-        }))
-      );
     };
 
     fetchOptions().catch(() => {
       setClassOptions([]);
-      setDepartmentOptions([]);
     });
   }, []);
 
@@ -84,12 +71,6 @@ export default function Subjects() {
       options: classOptions,
       defaultValue: [],
     },
-    {
-      name: "department",
-      label: "Department",
-      type: "select",
-      options: departmentOptions,
-    },
     { name: "description", label: "Description", type: "textarea" },
   ];
 
@@ -107,7 +88,6 @@ export default function Subjects() {
         subjectCode: record.subjectCode || "",
         subjectType: record.subjectType || "",
         applicableClasses: record.applicableClasses || [],
-        department: record.department || "",
         description: record.description || "",
       })}
     />

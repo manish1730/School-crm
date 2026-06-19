@@ -160,8 +160,15 @@ export default function SchoolProfile() {
     }
 
     // Website (Optional)
-    if (formData.website.trim() && !urlRegex.test(formData.website.trim())) {
-      return "Invalid Website URL";
+    let websiteValue = formData.website.trim();
+    if (websiteValue) {
+      if (!/^https?:\/\//i.test(websiteValue)) {
+        websiteValue = `https://${websiteValue}`;
+      }
+      const urlRegexForTest = /^(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{2,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/i;
+      if (!urlRegexForTest.test(websiteValue)) {
+        return "Invalid Website URL";
+      }
     }
 
     // Address
@@ -213,9 +220,16 @@ export default function SchoolProfile() {
 
     try {
       setSubmitting(true);
+      
+      let websiteValue = formData.website.trim();
+      if (websiteValue && !/^https?:\/\//i.test(websiteValue)) {
+        websiteValue = `https://${websiteValue}`;
+      }
+
       // Uppercase shortName
       const payload = {
         ...formData,
+        website: websiteValue,
         shortName: formData.shortName.toUpperCase(),
       };
 
@@ -244,8 +258,15 @@ export default function SchoolProfile() {
 
     try {
       setSubmitting(true);
+      
+      let websiteValue = formData.website.trim();
+      if (websiteValue && !/^https?:\/\//i.test(websiteValue)) {
+        websiteValue = `https://${websiteValue}`;
+      }
+
       const payload = {
         ...formData,
+        website: websiteValue,
         shortName: formData.shortName.toUpperCase(),
       };
 

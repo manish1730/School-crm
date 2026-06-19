@@ -14,6 +14,10 @@ import {
   FaUserPlus,
   FaBirthdayCake,
   FaChevronRight,
+  FaSchool,
+  FaPhoneAlt,
+  FaEnvelope,
+  FaMapMarkerAlt,
 } from "react-icons/fa";
 import {
   ResponsiveContainer,
@@ -40,6 +44,7 @@ import {
   getRecentActivities,
   getTodayBirthdays,
 } from "../../services/dashboardService";
+import { getSchoolProfile } from "../../services/schoolProfileService";
 
 // Colors for enquiry donut chart
 const FUNNEL_COLORS = ["#3b82f6", "#06b6d4", "#10b981", "#ef4444"]; // Blue, Cyan, Green, Red
@@ -61,6 +66,7 @@ export default function Dashboard() {
   const [collectionData, setCollectionData] = useState([]);
   const [activities, setActivities] = useState([]);
   const [birthdays, setBirthdays] = useState([]);
+  const [schoolProfile, setSchoolProfile] = useState(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -78,6 +84,7 @@ export default function Dashboard() {
           collectionRes,
           activitiesRes,
           birthdaysRes,
+          schoolProfileRes,
         ] = await Promise.all([
           getCardsAnalytics(),
           getAttendanceTrend(),
@@ -85,6 +92,10 @@ export default function Dashboard() {
           getCollectionTrend(),
           getRecentActivities(),
           getTodayBirthdays(),
+          getSchoolProfile().catch((e) => {
+            console.error("School Profile load error", e);
+            return { data: { data: null } };
+          }),
         ]);
 
         setCards(cardsRes.data.data);
@@ -93,6 +104,7 @@ export default function Dashboard() {
         setCollectionData(collectionRes.data.data);
         setActivities(activitiesRes.data.data);
         setBirthdays(birthdaysRes.data.data);
+        setSchoolProfile(schoolProfileRes?.data?.data);
       } catch (err) {
         console.error("Dashboard data fetch error:", err);
         setError("Failed to load dashboard statistics. Please try again.");
@@ -142,6 +154,48 @@ export default function Dashboard() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-6">
+      {/* SCHOOL PROFILE HIGHLIGHT WIDGET */}
+      {schoolProfile && (
+        <div className="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-900 to-indigo-950 p-6 text-white shadow-md flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center space-x-5">
+            {schoolProfile.logo ? (
+              <img
+                src={schoolProfile.logo}
+                alt={schoolProfile.schoolName}
+                className="h-20 w-20 rounded-xl object-contain bg-white p-1.5 shadow-md"
+              />
+            ) : (
+              <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-white/10 text-3xl">
+                <FaSchool className="text-blue-300" />
+              </div>
+            )}
+            <div>
+              <h2 className="text-2xl font-bold uppercase tracking-wide">{schoolProfile.schoolName}</h2>
+              <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-sm text-blue-200">
+                <span className="flex items-center gap-1.5"><FaMapMarkerAlt /> {schoolProfile.city}, {schoolProfile.state}</span>
+                <span>• Board: {schoolProfile.boardAffiliation}</span>
+                <span>• Type: {schoolProfile.schoolType}</span>
+                <span>• Principal: {schoolProfile.principal}</span>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col gap-1.5 text-sm text-right md:text-right text-blue-200 border-t border-white/10 pt-4 md:pt-0 md:border-t-0">
+            <span className="flex items-center justify-end gap-1.5"><FaPhoneAlt /> {schoolProfile.phone}</span>
+            <span className="flex items-center justify-end gap-1.5"><FaEnvelope /> {schoolProfile.email}</span>
+            {schoolProfile.website && (
+              <a
+                href={schoolProfile.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-300 hover:text-white underline transition-colors"
+              >
+                Visit Website
+              </a>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* HEADER SECTION */}
       <div className="flex flex-col gap-1">
         <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>

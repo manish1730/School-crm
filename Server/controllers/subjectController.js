@@ -8,7 +8,6 @@ const controller = createMasterCrudController({
     "subjectName",
     "subjectCode",
     "subjectType",
-    "department",
     "description",
   ],
   duplicateChecks: [

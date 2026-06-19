@@ -26,11 +26,25 @@ export const markStaffAttendance = async (req, res) => {
     if (!attendanceDate) return res.status(400).json({ success: false, message: "Attendance Date is required" });
     if (!["Present", "Absent", "Leave", "Late"].includes(status)) return res.status(400).json({ success: false, message: "Status is required" });
 
-    const exists = await StaffAttendance.findOne({ staffId, attendanceDate: new Date(attendanceDate), isActive: true });
-    if (exists) return res.status(400).json({ success: false, message: "Attendance cannot be marked twice" });
-
-    const record = await StaffAttendance.create({ staffId, attendanceDate, status, createdBy: req.user?.id, updatedBy: req.user?.id });
-    res.status(201).json({ success: true, message: "Staff attendance marked successfully", data: record });
+    const day = new Date(attendanceDate);
+    const record = await StaffAttendance.findOneAndUpdate(
+      {
+        staffId,
+        attendanceDate: day,
+        isActive: true,
+      },
+      {
+        $set: {
+          status,
+          updatedBy: req.user?.id,
+        },
+        $setOnInsert: {
+          createdBy: req.user?.id,
+        }
+      },
+      { upsert: true, new: true }
+    );
+    res.status(200).json({ success: true, message: "Attendance updated successfully", data: record });
   } catch (error) {
     res.status(500).json({ success: false, message: "Failed to mark staff attendance" });
   }
