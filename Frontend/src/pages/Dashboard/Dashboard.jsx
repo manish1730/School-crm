@@ -238,9 +238,7 @@ export default function Dashboard() {
               <FaUserGraduate className="h-6 w-6 text-white" />
             </div>
           </div>
-          <div className="mt-4 flex items-center text-xs opacity-90 font-medium">
-            <span>↑ 5.2% vs last month</span>
-          </div>
+
         </div>
 
         {/* TOTAL STAFF */}
@@ -254,9 +252,7 @@ export default function Dashboard() {
               <FaChalkboardTeacher className="h-6 w-6 text-gray-600" />
             </div>
           </div>
-          <div className="mt-4 flex items-center text-xs text-green-600 font-medium">
-            <span>↑ 2 new vs last month</span>
-          </div>
+
         </div>
 
         {/* TODAY'S ATTENDANCE */}
@@ -270,9 +266,7 @@ export default function Dashboard() {
               <FaClipboardCheck className="h-6 w-6 text-gray-600" />
             </div>
           </div>
-          <div className="mt-4 flex items-center text-xs text-green-600 font-medium">
-            <span>↑ 1.3% vs last month</span>
-          </div>
+
         </div>
 
         {/* FEE COLLECTION TODAY */}
@@ -286,9 +280,7 @@ export default function Dashboard() {
               <FaMoneyBillWave className="h-6 w-6 text-white" />
             </div>
           </div>
-          <div className="mt-4 flex items-center text-xs opacity-90 font-medium">
-            <span>↑ 12.5% vs last month</span>
-          </div>
+
         </div>
 
         {/* MONTHLY COLLECTION */}
@@ -318,9 +310,7 @@ export default function Dashboard() {
               <FaExclamationCircle className="h-6 w-6 text-amber-500" />
             </div>
           </div>
-          <div className="mt-4 flex items-center text-xs text-red-600 font-medium">
-            <span>↓ 3.1% vs last month</span>
-          </div>
+
         </div>
 
         {/* UPCOMING EVENTS */}

@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { FaUpload, FaTrash, FaCheckCircle, FaSpinner } from "react-icons/fa";
+import { FaCheckCircle, FaSpinner } from "react-icons/fa";
 import {
   getSchoolProfile,
   createSchoolProfile,
   updateSchoolProfile,
-  uploadSchoolImage,
 } from "../../services/schoolProfileService";
-import { getAcademicYears } from "../../services/academicYearServices";
 import FeeToast from "../../components/FeeToast";
 import { useAppDispatch } from "../../redux/hooks";
 import { fetchMasterDataThunk } from "../../redux/features/master/masterSlice";
@@ -48,10 +46,8 @@ export default function SchoolProfile() {
   });
 
   const [profileId, setProfileId] = useState(null);
-  const [academicYears, setAcademicYears] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [uploadingField, setUploadingField] = useState(""); // logo, banner, favicon
   const [toast, setToast] = useState(null);
 
   // Auto-clear toast
@@ -71,10 +67,6 @@ export default function SchoolProfile() {
     const fetchData = async () => {
       try {
         setLoading(true);
-
-        // Fetch academic years
-        const yearsRes = await getAcademicYears();
-        setAcademicYears(yearsRes.data.data || []);
 
         // Fetch profile
         const profileRes = await getSchoolProfile();
@@ -207,7 +199,6 @@ export default function SchoolProfile() {
     if (formData.adminHead.trim().length < 3) return "Admin Head Name must be at least 3 characters";
 
     // Academic Settings
-    if (!formData.academicYearId) return "Current Academic Year is required";
     if (!formData.sessionStatus) return "Session Status is required";
 
     return null;
@@ -293,51 +284,7 @@ export default function SchoolProfile() {
     }
   };
 
-  // 3. handleUploadLogo (and banner / favicon)
-  const handleImageChange = async (e, field) => {
-    const file = e.target.files[0];
-    if (!file) return;
 
-    // Validate size (5MB)
-    const maxSize = 5 * 1024 * 1024;
-    if (file.size > maxSize) {
-      showToast("File size must be less than 5MB", "error");
-      e.target.value = ""; // clear input
-      return;
-    }
-
-    // Validate extension
-    const allowedExtensions = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-    if (!allowedExtensions.includes(file.type)) {
-      showToast("Invalid file format", "error");
-      e.target.value = ""; // clear input
-      return;
-    }
-
-    try {
-      setUploadingField(field);
-      const res = await uploadSchoolImage(file, field);
-      const fileUrl = `http://localhost:5000${res.data.data.url}`;
-      setFormData((prev) => ({ ...prev, [field]: fileUrl }));
-      showToast(res.data.message || "Logo Uploaded Successfully", "success");
-    } catch (error) {
-      console.error(error);
-      showToast(
-        error?.response?.data?.message || "Failed to upload image",
-        "error"
-      );
-    } finally {
-      setUploadingField("");
-      e.target.value = ""; // clear input
-    }
-  };
-
-  // 4. handleDeleteLogo (and banner / favicon)
-  const handleRemoveImage = (field) => {
-    setFormData((prev) => ({ ...prev, [field]: "" }));
-    const fieldNameFormatted = field.charAt(0).toUpperCase() + field.slice(1);
-    showToast(`${fieldNameFormatted} Removed Successfully`, "success");
-  };
 
   if (loading) {
     return (
@@ -617,274 +564,6 @@ export default function SchoolProfile() {
                 onChange={(e) => setFormData({ ...formData, adminHead: e.target.value })}
                 className="w-full rounded-xl bg-gray-50 border border-gray-200 px-4 py-2.5 text-sm outline-none transition-all focus:border-blue-900 focus:bg-white"
               />
-            </div>
-          </div>
-        </div>
-
-        {/* SECTION 4: SCHOOL BRANDING */}
-        <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-          <h2 className="mb-4 text-lg font-bold text-gray-800 border-b pb-2">4. School Branding</h2>
-          <div className="grid gap-6 md:grid-cols-3">
-            {/* Logo Upload */}
-            <div className="flex flex-col items-center rounded-xl border border-dashed border-gray-200 p-4">
-              <span className="mb-2 text-sm font-semibold text-gray-600">School Logo</span>
-              <div className="relative mb-3 flex h-24 w-24 items-center justify-center rounded-xl bg-gray-100 overflow-hidden border">
-                {formData.logo ? (
-                  <img src={formData.logo} alt="School Logo" className="h-full w-full object-cover" />
-                ) : (
-                  <span className="text-xs text-gray-400">200 x 200</span>
-                )}
-                {uploadingField === "logo" && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                    <FaSpinner className="h-5 w-5 animate-spin text-white" />
-                  </div>
-                )}
-              </div>
-              <div className="flex gap-2">
-                <label className="flex cursor-pointer items-center gap-1.5 rounded-lg bg-blue-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-800">
-                  <FaUpload />
-                  <span>Upload</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleImageChange(e, "logo")}
-                    className="sr-only"
-                  />
-                </label>
-                {formData.logo && (
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveImage("logo")}
-                    className="flex items-center gap-1.5 rounded-lg bg-red-100 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-200"
-                  >
-                    <FaTrash />
-                    <span>Delete</span>
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Banner Upload */}
-            <div className="flex flex-col items-center rounded-xl border border-dashed border-gray-200 p-4">
-              <span className="mb-2 text-sm font-semibold text-gray-600">School Banner</span>
-              <div className="relative mb-3 flex h-24 w-full max-w-[200px] items-center justify-center rounded-xl bg-gray-100 overflow-hidden border">
-                {formData.banner ? (
-                  <img src={formData.banner} alt="School Banner" className="h-full w-full object-cover" />
-                ) : (
-                  <span className="text-xs text-gray-400">Banner Image</span>
-                )}
-                {uploadingField === "banner" && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                    <FaSpinner className="h-5 w-5 animate-spin text-white" />
-                  </div>
-                )}
-              </div>
-              <div className="flex gap-2">
-                <label className="flex cursor-pointer items-center gap-1.5 rounded-lg bg-blue-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-800">
-                  <FaUpload />
-                  <span>Upload</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleImageChange(e, "banner")}
-                    className="sr-only"
-                  />
-                </label>
-                {formData.banner && (
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveImage("banner")}
-                    className="flex items-center gap-1.5 rounded-lg bg-red-100 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-200"
-                  >
-                    <FaTrash />
-                    <span>Delete</span>
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Favicon Upload */}
-            <div className="flex flex-col items-center rounded-xl border border-dashed border-gray-200 p-4">
-              <span className="mb-2 text-sm font-semibold text-gray-600">Favicon</span>
-              <div className="relative mb-3 flex h-24 w-24 items-center justify-center rounded-xl bg-gray-100 overflow-hidden border">
-                {formData.favicon ? (
-                  <img src={formData.favicon} alt="Favicon" className="h-10 w-10 object-contain" />
-                ) : (
-                  <span className="text-xs text-gray-400">Favicon Icon</span>
-                )}
-                {uploadingField === "favicon" && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                    <FaSpinner className="h-5 w-5 animate-spin text-white" />
-                  </div>
-                )}
-              </div>
-              <div className="flex gap-2">
-                <label className="flex cursor-pointer items-center gap-1.5 rounded-lg bg-blue-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-800">
-                  <FaUpload />
-                  <span>Upload</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleImageChange(e, "favicon")}
-                    className="sr-only"
-                  />
-                </label>
-                {formData.favicon && (
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveImage("favicon")}
-                    className="flex items-center gap-1.5 rounded-lg bg-red-100 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-200"
-                  >
-                    <FaTrash />
-                    <span>Delete</span>
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* SECTION 5: ACADEMIC SETTINGS */}
-        <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-          <h2 className="mb-4 text-lg font-bold text-gray-800 border-b pb-2">5. Academic Settings</h2>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold text-gray-600 uppercase">
-                Current Academic Year <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={formData.academicYearId}
-                onChange={(e) => setFormData({ ...formData, academicYearId: e.target.value })}
-                className="w-full rounded-xl bg-gray-50 border border-gray-200 px-4 py-2.5 text-sm outline-none transition-all focus:border-blue-900 focus:bg-white"
-              >
-                <option value="">Select Academic Year</option>
-                {academicYears.map((year) => (
-                  <option key={year._id} value={year._id}>
-                    {year.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold text-gray-600 uppercase">
-                Current Session Status <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={formData.sessionStatus}
-                onChange={(e) => setFormData({ ...formData, sessionStatus: e.target.value })}
-                className="w-full rounded-xl bg-gray-50 border border-gray-200 px-4 py-2.5 text-sm outline-none transition-all focus:border-blue-900 focus:bg-white"
-              >
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* SECTION 6: SYSTEM SETTINGS */}
-        <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-          <h2 className="mb-4 text-lg font-bold text-gray-800 border-b pb-2">6. System Settings</h2>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {/* Attendance Toggle */}
-            <div className="flex items-center justify-between rounded-xl bg-gray-50 p-4 border">
-              <div>
-                <h3 className="text-sm font-semibold text-gray-800">Attendance Module</h3>
-                <p className="text-xs text-gray-500">Enable/disable attendance tracking</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.attendanceEnabled}
-                  onChange={(e) => setFormData({ ...formData, attendanceEnabled: e.target.checked })}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-900"></div>
-              </label>
-            </div>
-
-            {/* Fee management Toggle */}
-            <div className="flex items-center justify-between rounded-xl bg-gray-50 p-4 border">
-              <div>
-                <h3 className="text-sm font-semibold text-gray-800">Fee Management</h3>
-                <p className="text-xs text-gray-500">Enable/disable fee tracking & finance</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.feeManagementEnabled}
-                  onChange={(e) => setFormData({ ...formData, feeManagementEnabled: e.target.checked })}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-900"></div>
-              </label>
-            </div>
-
-            {/* Exam Toggle */}
-            <div className="flex items-center justify-between rounded-xl bg-gray-50 p-4 border">
-              <div>
-                <h3 className="text-sm font-semibold text-gray-800">Exam Module</h3>
-                <p className="text-xs text-gray-500">Enable/disable exam mark sheets & results</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.examEnabled}
-                  onChange={(e) => setFormData({ ...formData, examEnabled: e.target.checked })}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-900"></div>
-              </label>
-            </div>
-
-            {/* Transport Toggle */}
-            <div className="flex items-center justify-between rounded-xl bg-gray-50 p-4 border">
-              <div>
-                <h3 className="text-sm font-semibold text-gray-800">Transport Module</h3>
-                <p className="text-xs text-gray-500">Enable/disable school bus routes</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.transportEnabled}
-                  onChange={(e) => setFormData({ ...formData, transportEnabled: e.target.checked })}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-900"></div>
-              </label>
-            </div>
-
-            {/* SMS Toggle */}
-            <div className="flex items-center justify-between rounded-xl bg-gray-50 p-4 border">
-              <div>
-                <h3 className="text-sm font-semibold text-gray-800">SMS Notifications</h3>
-                <p className="text-xs text-gray-500">Enable/disable text message alerts</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.smsNotificationsEnabled}
-                  onChange={(e) => setFormData({ ...formData, smsNotificationsEnabled: e.target.checked })}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-900"></div>
-              </label>
-            </div>
-
-            {/* Email Toggle */}
-            <div className="flex items-center justify-between rounded-xl bg-gray-50 p-4 border">
-              <div>
-                <h3 className="text-sm font-semibold text-gray-800">Email Notifications</h3>
-                <p className="text-xs text-gray-500">Enable/disable automatic email receipts</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.emailNotificationsEnabled}
-                  onChange={(e) => setFormData({ ...formData, emailNotificationsEnabled: e.target.checked })}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-900"></div>
-              </label>
             </div>
           </div>
         </div>
