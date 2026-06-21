@@ -8,8 +8,11 @@ import {
  deleteAcademicYear,
  setCurrentAcademicYear,
 } from "../../../services/academicYearServices";
+import { useAppDispatch } from "../../../redux/hooks";
+import { fetchMasterDataThunk } from "../../../redux/features/master/masterSlice";
 
 export default function AcademicYears() {
+  const dispatch = useAppDispatch();
   const [academicYears, setAcademicYears] = useState([]);
 
   const [currentYear, setCurrentYear] = useState("");
@@ -106,6 +109,7 @@ useEffect(() => {
     }
 
     await fetchAcademicYears();
+    dispatch(fetchMasterDataThunk());
 
     setCurrentYear(
       academicYearName
@@ -145,6 +149,7 @@ const handleDelete = async (id) => {
       await deleteAcademicYear(id);
 
     await fetchAcademicYears();
+    dispatch(fetchMasterDataThunk());
 
     setSuccessMessage(
       response.data.message
@@ -256,6 +261,7 @@ const handleEdit = (year) => {
                   setCurrentYear(selectedName);
                   setSuccessMessage("Current academic year updated successfully");
                   await fetchAcademicYears();
+                  dispatch(fetchMasterDataThunk());
                 } catch (err) {
                   setError(err?.response?.data?.message || "Failed to update current year");
                 }

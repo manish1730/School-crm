@@ -105,7 +105,7 @@ export const selectAllAcademicYears = createSelector(
 
 export const selectActiveAcademicYear = createSelector(
   [selectAllAcademicYears],
-  (academicYears) => academicYears.find(year => year.isCurrentYear) || academicYears[0]
+  (academicYears) => academicYears.find(year => year.isCurrent) || academicYears[0]
 );
 
 export const selectDepartments = createSelector(

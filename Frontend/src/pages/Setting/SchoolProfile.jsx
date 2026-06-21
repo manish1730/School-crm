@@ -8,8 +8,12 @@ import {
 } from "../../services/schoolProfileService";
 import { getAcademicYears } from "../../services/academicYearServices";
 import FeeToast from "../../components/FeeToast";
+import { useAppDispatch } from "../../redux/hooks";
+import { fetchMasterDataThunk } from "../../redux/features/master/masterSlice";
+import { fetchSchoolProfileThunk } from "../../redux/features/settings/settingsSlice";
 
 export default function SchoolProfile() {
+  const dispatch = useAppDispatch();
   const [formData, setFormData] = useState({
     schoolName: "",
     shortName: "",
@@ -235,6 +239,9 @@ export default function SchoolProfile() {
 
       const res = await createSchoolProfile(payload);
       setProfileId(res.data.data._id);
+      // Sync Redux state so sidebar academic year and settings update instantly
+      dispatch(fetchMasterDataThunk());
+      dispatch(fetchSchoolProfileThunk());
       showToast("School Profile Created Successfully", "success");
     } catch (error) {
       console.error(error);
@@ -270,7 +277,10 @@ export default function SchoolProfile() {
         shortName: formData.shortName.toUpperCase(),
       };
 
-      const res = await updateSchoolProfile(profileId, payload);
+      await updateSchoolProfile(profileId, payload);
+      // Sync Redux state so sidebar academic year and settings update instantly
+      dispatch(fetchMasterDataThunk());
+      dispatch(fetchSchoolProfileThunk());
       showToast("School Profile Updated Successfully", "success");
     } catch (error) {
       console.error(error);
