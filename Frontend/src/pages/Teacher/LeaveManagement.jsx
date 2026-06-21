@@ -1,50 +1,69 @@
 import { useEffect, useState } from "react";
 import MasterModal from "../../components/masters/MasterModal";
-import { createLeaveRequest, getLeaveRequests, getStaff, updateLeaveStatus } from "../../services/staffService";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import {
+  fetchStaffThunk,
+  fetchLeaveRequestsThunk,
+  createLeaveRequestThunk,
+  updateLeaveStatusThunk,
+  clearStaffError,
+  clearStaffSuccess,
+} from "../../redux/features/staff/staffSlice";
 
 const initialForm = { staffId: "", leaveType: "", fromDate: "", toDate: "", reason: "" };
 
 export default function LeaveManagement() {
-  const [staff, setStaff] = useState([]);
-  const [leaves, setLeaves] = useState([]);
-  const [stats, setStats] = useState({ total: 0, approved: 0, pending: 0, rejected: 0 });
+  const dispatch = useAppDispatch();
+  const {
+    list: staff,
+    leaves,
+    leaveStats: stats,
+    error: reduxError,
+    successMessage: reduxSuccess,
+  } = useAppSelector((state) => state.staff);
+
   const [formData, setFormData] = useState(initialForm);
   const [showModal, setShowModal] = useState(false);
-  const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+  const [localError, setLocalError] = useState("");
+  const [localSuccess, setLocalSuccess] = useState("");
+
+  const error = localError || reduxError;
+  const successMessage = localSuccess || reduxSuccess;
 
   const fetchData = async () => {
-    const [staffResponse, leaveResponse] = await Promise.all([getStaff(), getLeaveRequests()]);
-    setStaff(staffResponse.data.data || []);
-    setLeaves(leaveResponse.data.data.leaves || []);
-    setStats(leaveResponse.data.data.stats || stats);
+    dispatch(fetchStaffThunk());
+    dispatch(fetchLeaveRequestsThunk());
   };
 
   useEffect(() => {
-    fetchData().catch(() => setError("Failed to load leave management"));
-  }, []);
+    dispatch(clearStaffError());
+    dispatch(clearStaffSuccess());
+    fetchData();
+  }, [dispatch]);
 
   const handleAddLeave = async () => {
-    try {
-      setError("");
-      const response = await createLeaveRequest(formData);
-      setSuccessMessage(response.data.message);
+    setLocalError("");
+    setLocalSuccess("");
+    dispatch(clearStaffError());
+    dispatch(clearStaffSuccess());
+
+    const resultAction = await dispatch(createLeaveRequestThunk(formData));
+    if (createLeaveRequestThunk.fulfilled.match(resultAction)) {
       setShowModal(false);
       setFormData(initialForm);
-      await fetchData();
-    } catch (error) {
-      setError(error?.response?.data?.message || "Failed to create leave request");
+      fetchData();
     }
   };
 
   const handleStatus = async (id, status) => {
-    try {
-      setError("");
-      const response = await updateLeaveStatus(id, status);
-      setSuccessMessage(response.data.message);
-      await fetchData();
-    } catch (error) {
-      setError(error?.response?.data?.message || "Failed to update leave status");
+    setLocalError("");
+    setLocalSuccess("");
+    dispatch(clearStaffError());
+    dispatch(clearStaffSuccess());
+
+    const resultAction = await dispatch(updateLeaveStatusThunk({ id, status }));
+    if (updateLeaveStatusThunk.fulfilled.match(resultAction)) {
+      fetchData();
     }
   };
 

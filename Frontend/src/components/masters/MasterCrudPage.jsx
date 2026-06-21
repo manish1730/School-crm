@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import MasterModal from "./MasterModal";
+import { useAppDispatch } from "../../redux/hooks";
+import { fetchMasterDataThunk } from "../../redux/features/master/masterSlice";
 
 const getInitialForm = (fields) =>
   fields.reduce((form, field) => {
@@ -89,19 +91,33 @@ export default function MasterCrudPage({
   transformRecord,
   enablePagination = false,
   children,
+  // Optional Redux Integration:
+  reduxRecords,
+  reduxLoading,
+  reduxError,
+  reduxTotal,
+  onFetchRedux,
+  onSaveRedux,
+  onDeleteRedux,
 }) {
-  const [records, setRecords] = useState([]);
+  const [localRecords, setLocalRecords] = useState([]);
   const [formData, setFormData] = useState(() => getInitialForm(fields));
   const [editId, setEditId] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [localTotal, setLocalTotal] = useState(0);
+  const [localLoading, setLocalLoading] = useState(false);
+  const [localError, setLocalError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const limit = 10;
+  const dispatch = useAppDispatch();
+
+  const records = reduxRecords !== undefined ? reduxRecords : localRecords;
+  const loading = reduxLoading !== undefined ? reduxLoading : localLoading;
+  const error = reduxError !== undefined ? reduxError : localError;
+  const total = reduxTotal !== undefined ? reduxTotal : localTotal;
 
   const totalPages = useMemo(
     () => Math.max(1, Math.ceil(total / limit)),
@@ -109,23 +125,28 @@ export default function MasterCrudPage({
   );
 
   const fetchRecords = async () => {
+    if (onFetchRedux) {
+      onFetchRedux({ search, page, limit });
+      return;
+    }
+
     try {
-      setLoading(true);
-      setError("");
+      setLocalLoading(true);
+      setLocalError("");
 
       const response = await service.getAll({
         search,
         ...(enablePagination ? { page, limit } : {}),
       });
 
-      setRecords(response.data.data || []);
-      setTotal(response.data.total || response.data.count || 0);
+      setLocalRecords(response.data.data || []);
+      setLocalTotal(response.data.total || response.data.count || 0);
     } catch (error) {
-      setError(
+      setLocalError(
         getErrorMessage(error, `Failed to load ${entityName}`)
       );
     } finally {
-      setLoading(false);
+      setLocalLoading(false);
     }
   };
 
@@ -136,7 +157,7 @@ export default function MasterCrudPage({
   const resetModalState = () => {
     setFormData(getInitialForm(fields));
     setEditId(null);
-    setError("");
+    setLocalError("");
     setSuccessMessage("");
   };
 
@@ -153,7 +174,7 @@ export default function MasterCrudPage({
   };
 
   const handleEdit = (record) => {
-    setError("");
+    setLocalError("");
     setSuccessMessage("");
     setEditId(record._id);
     setFormData(
@@ -172,23 +193,30 @@ export default function MasterCrudPage({
 
   const handleSave = async () => {
     try {
-      setError("");
+      setLocalError("");
       setSuccessMessage("");
 
       const validationMessage = validate?.(formData);
 
       if (validationMessage) {
-        setError(validationMessage);
+        setLocalError(validationMessage);
         return;
       }
 
       const payload = buildPayload ? buildPayload(formData) : formData;
-      const response = editId
-        ? await service.update(editId, payload)
-        : await service.create(payload);
 
-      setSuccessMessage(response.data.message);
+      if (onSaveRedux) {
+        await onSaveRedux(editId, payload);
+        setSuccessMessage(editId ? `${entityName} updated successfully` : `${entityName} created successfully`);
+      } else {
+        const response = editId
+          ? await service.update(editId, payload)
+          : await service.create(payload);
+        setSuccessMessage(response.data.message);
+      }
+
       await fetchRecords();
+      dispatch(fetchMasterDataThunk());
 
       setTimeout(() => {
         setShowModal(false);
@@ -196,7 +224,7 @@ export default function MasterCrudPage({
         setEditId(null);
       }, 1000);
     } catch (error) {
-      setError(
+      setLocalError(
         getErrorMessage(error, `Failed to save ${entityName}`)
       );
     }
@@ -204,16 +232,22 @@ export default function MasterCrudPage({
 
   const handleDelete = async () => {
     try {
-      setError("");
+      setLocalError("");
       setSuccessMessage("");
 
-      const response = await service.remove(deleteRecord._id);
+      if (onDeleteRedux) {
+        await onDeleteRedux(deleteRecord._id);
+        setSuccessMessage(`${entityName} deleted successfully`);
+      } else {
+        const response = await service.remove(deleteRecord._id);
+        setSuccessMessage(response.data.message);
+      }
 
-      setSuccessMessage(response.data.message);
       setDeleteRecord(null);
       await fetchRecords();
+      dispatch(fetchMasterDataThunk());
     } catch (error) {
-      setError(
+      setLocalError(
         getErrorMessage(error, `Failed to delete ${entityName}`)
       );
     }

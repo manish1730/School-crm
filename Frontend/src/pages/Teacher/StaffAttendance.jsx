@@ -1,39 +1,54 @@
 import { useEffect, useState } from "react";
-import { getStaffAttendance, markStaffAttendance } from "../../services/staffService";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import {
+  fetchStaffAttendanceThunk,
+  markStaffAttendanceThunk,
+  clearStaffError,
+  clearStaffSuccess,
+} from "../../redux/features/staff/staffSlice";
 
 const statuses = ["Present", "Absent", "Leave", "Late"];
 
 export default function StaffAttendance() {
+  const dispatch = useAppDispatch();
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
-  const [staff, setStaff] = useState([]);
-  const [records, setRecords] = useState([]);
-  const [stats, setStats] = useState({ totalStaff: 0, present: 0, absent: 0, onLeave: 0 });
-  const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+
+  const {
+    attendanceStaff: staff,
+    attendanceRecords: records,
+    attendanceStats: stats,
+    error: reduxError,
+    successMessage: reduxSuccess,
+  } = useAppSelector((state) => state.staff);
+
+  const [localError, setLocalError] = useState("");
+  const [localSuccess, setLocalSuccess] = useState("");
+
+  const error = localError || reduxError;
+  const successMessage = localSuccess || reduxSuccess;
 
   const fetchAttendance = async () => {
-    try {
-      const response = await getStaffAttendance({ date });
-      setStaff(response.data.data.staff || []);
-      setRecords(response.data.data.records || []);
-      setStats(response.data.data.stats || stats);
-    } catch (error) {
-      setError(error?.response?.data?.message || "Failed to load staff attendance");
-    }
+    dispatch(fetchStaffAttendanceThunk({ date }));
   };
 
   useEffect(() => {
+    dispatch(clearStaffError());
+    dispatch(clearStaffSuccess());
     fetchAttendance();
-  }, [date]);
+  }, [dispatch, date]);
 
   const markAttendance = async (staffId, status) => {
-    try {
-      setError("");
-      const response = await markStaffAttendance({ staffId, attendanceDate: date, status });
-      setSuccessMessage(response.data.message);
-      await fetchAttendance();
-    } catch (error) {
-      setError(error?.response?.data?.message || "Failed to mark staff attendance");
+    setLocalError("");
+    setLocalSuccess("");
+    dispatch(clearStaffError());
+    dispatch(clearStaffSuccess());
+
+    const resultAction = await dispatch(
+      markStaffAttendanceThunk({ staffId, attendanceDate: date, status })
+    );
+
+    if (markStaffAttendanceThunk.fulfilled.match(resultAction)) {
+      fetchAttendance();
     }
   };
 

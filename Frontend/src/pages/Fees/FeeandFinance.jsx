@@ -1,28 +1,44 @@
 import { useEffect, useMemo, useState } from "react";
-import { FaDownload, FaEye, FaFileExcel, FaFilePdf, FaPrint, FaTrash } from "react-icons/fa";
+import { FaDownload, FaFilePdf, FaFileExcel, FaPrint, FaTrash, FaEye } from "react-icons/fa";
 import FeeToast from "../../components/FeeToast";
 import MasterModal from "../../components/masters/MasterModal";
 import {
-  categoryService,
-  classSectionService,
-} from "../../services/masterSetupServices";
-import { getAcademicYears } from "../../services/academicYearServices";
-import { getStudents } from "../../services/studentService";
-import {
-  createFeeStructure,
-  deleteFeeStructure,
   downloadReceipt,
   exportFeeCollectionsExcel,
   exportFeeCollectionsPdf,
   exportFeeStructuresExcel,
   exportFeeStructuresPdf,
-  getFeeCollections,
-  getFeeStructures,
   getReceipt,
-  getStudentFeeSummary,
-  recordFeePayment,
-  updateFeeStructure,
 } from "../../services/feeService";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import {
+  fetchFeeStudentsThunk,
+  fetchFeeCollectionsThunk,
+  fetchFeeStructuresThunk,
+  createFeeStructureThunk,
+  updateFeeStructureThunk,
+  deleteFeeStructureThunk,
+  fetchStudentFeeSummaryThunk,
+  recordFeePaymentThunk,
+  clearStudentFeeSummary,
+  clearFeesError,
+  clearFeesSuccess,
+  setStudentSummaryFromRow,
+  selectFeeCollections,
+  selectFeeCollectionStats,
+  selectFeeCollectionTotal,
+  selectFeeStructures,
+  selectFeeStructureTotal,
+  selectStudentFeeSummary,
+  selectFeesLoading,
+  selectFeesActionLoading,
+  selectFeeStudents,
+} from "../../redux/features/fees/feesSlice";
+import {
+  selectAllAcademicYears as selectFeeAcademicYears,
+  selectClassSections as selectFeeClassSections,
+  selectCategories as selectFeeCategories,
+} from "../../redux/features/master/masterSlice";
 
 const feeHeads = ["Tuition", "Admission", "Exam", "Transport", "Annual Charges"];
 const paymentModes = ["Cash", "UPI", "Card", "Bank Transfer", "Cheque"];
@@ -58,8 +74,10 @@ const initialPaymentForm = {
   remarks: "",
 };
 
-const getErrorMessage = (error, fallback) =>
-  error?.response?.data?.message || fallback;
+const getErrorMessage = (error, fallback) => {
+  const msg = error?.response?.data?.message;
+  return typeof msg === "string" ? msg : error?.message || fallback;
+};
 
 const money = (value) =>
   new Intl.NumberFormat("en-IN", {
@@ -80,7 +98,6 @@ const saveBlob = (response, filename) => {
 const printBlob = (response) => {
   const url = URL.createObjectURL(response.data);
   const printWindow = window.open(url, "_blank");
-
   if (printWindow) {
     printWindow.onload = () => printWindow.print();
   }
@@ -131,18 +148,24 @@ function Select({ label, value, options, onChange }) {
 }
 
 export default function FeeandFinance() {
+  const dispatch = useAppDispatch();
+
+  // ─── Redux global state ───────────────────────────────────────────────
+  const academicYears = useAppSelector(selectFeeAcademicYears);
+  const classSections = useAppSelector(selectFeeClassSections);
+  const categories    = useAppSelector(selectFeeCategories);
+  const students      = useAppSelector(selectFeeStudents);
+  const collections         = useAppSelector(selectFeeCollections);
+  const collectionStats     = useAppSelector(selectFeeCollectionStats);
+  const collectionTotal     = useAppSelector(selectFeeCollectionTotal);
+  const structures          = useAppSelector(selectFeeStructures);
+  const structureTotal      = useAppSelector(selectFeeStructureTotal);
+  const paymentSummary      = useAppSelector(selectStudentFeeSummary);
+  const listLoading         = useAppSelector(selectFeesLoading);
+  const actionLoading       = useAppSelector(selectFeesActionLoading);
+
+  // ─── Local UI state (forms, modals, filters, pagination) ─────────────
   const [activeTab, setActiveTab] = useState("collection");
-  const [academicYears, setAcademicYears] = useState([]);
-  const [classSections, setClassSections] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [students, setStudents] = useState([]);
-  const [collections, setCollections] = useState([]);
-  const [collectionStats, setCollectionStats] = useState({
-    totalStudents: 0,
-    totalCollected: 0,
-    pendingAmount: 0,
-    overduePayments: 0,
-  });
   const [collectionFilters, setCollectionFilters] = useState({
     search: "",
     status: "",
@@ -153,32 +176,28 @@ export default function FeeandFinance() {
     className: "",
   });
   const [collectionPage, setCollectionPage] = useState(1);
-  const [collectionTotal, setCollectionTotal] = useState(0);
-  const [collectionLoading, setCollectionLoading] = useState(false);
-  const [structures, setStructures] = useState([]);
   const [structureFilters, setStructureFilters] = useState({
     search: "",
     academicYearId: "",
     classSectionId: "",
   });
   const [structurePage, setStructurePage] = useState(1);
-  const [structureTotal, setStructureTotal] = useState(0);
-  const [structureLoading, setStructureLoading] = useState(false);
   const [structureForm, setStructureForm] = useState(initialStructureForm);
   const [editStructureId, setEditStructureId] = useState(null);
   const [showStructureModal, setShowStructureModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [paymentForm, setPaymentForm] = useState(initialPaymentForm);
-  const [paymentSummary, setPaymentSummary] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [receipt, setReceipt] = useState(null);
-  const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState("");
   const [toast, setToast] = useState(null);
 
+  // ─── Derived / memoised ───────────────────────────────────────────────
   const classOptions = useMemo(
-    () => [...new Set(classSections.map((item) => item.className))]
-      .map((className) => ({ label: className, value: className })),
+    () =>
+      [...new Set(classSections.map((item) => item.className))].map(
+        (className) => ({ label: className, value: className })
+      ),
     [classSections]
   );
 
@@ -198,141 +217,110 @@ export default function FeeandFinance() {
   }));
 
   const collectionTotalPages = Math.max(1, Math.ceil(collectionTotal / limit));
-  const structureTotalPages = Math.max(1, Math.ceil(structureTotal / limit));
+  const structureTotalPages  = Math.max(1, Math.ceil(structureTotal / limit));
 
+  // ─── Toast helper ─────────────────────────────────────────────────────
   const showToast = (type, message) => {
     setToast({ type, message });
     setTimeout(() => setToast(null), 3000);
   };
 
-  const fetchMasters = async () => {
-    try {
-      const [yearsResponse, sectionsResponse, categoriesResponse, studentsResponse] =
-        await Promise.all([
-          getAcademicYears(),
-          classSectionService.getAll({ page: 1, limit: 1000 }),
-          categoryService.getAll({ page: 1, limit: 1000 }),
-          getStudents(),
-        ]);
+  // ─── Initial master load ──────────────────────────────────────────────
+  useEffect(() => {
+    dispatch(fetchFeeStudentsThunk())
+      .unwrap()
+      .then((payload) => {
+        const currentYear =
+          payload.academicYears.find((y) => y.isCurrent) ||
+          payload.academicYears[0];
+        if (currentYear) {
+          setCollectionFilters((prev) => ({
+            ...prev,
+            academicYearId: prev.academicYearId || currentYear._id,
+          }));
+          setStructureFilters((prev) => ({
+            ...prev,
+            academicYearId: prev.academicYearId || currentYear._id,
+          }));
+          setStructureForm((prev) => ({
+            ...prev,
+            academicYearId: prev.academicYearId || currentYear._id,
+          }));
+          setPaymentForm((prev) => ({
+            ...prev,
+            academicYearId: prev.academicYearId || currentYear._id,
+          }));
+        }
+      })
+      .catch((message) => showToast("error", message));
+  }, [dispatch]);
 
-      const years = yearsResponse.data.data || [];
-      setAcademicYears(years);
-      setClassSections(sectionsResponse.data.data || []);
-      setCategories(categoriesResponse.data.data || []);
-      setStudents(studentsResponse.data.data || []);
-
-      const currentYear = years.find((item) => item.isCurrent) || years[0];
-      if (currentYear) {
-        setCollectionFilters((current) => ({
-          ...current,
-          academicYearId: current.academicYearId || currentYear._id,
-        }));
-        setStructureForm((current) => ({
-          ...current,
-          academicYearId: current.academicYearId || currentYear._id,
-        }));
-        setPaymentForm((current) => ({
-          ...current,
-          academicYearId: current.academicYearId || currentYear._id,
-        }));
-      }
-    } catch (error) {
-      showToast("error", getErrorMessage(error, "Failed to load fee master data"));
-    }
-  };
-
-  const fetchCollections = async () => {
-    try {
-      setCollectionLoading(true);
-      const response = await getFeeCollections({
-        ...collectionFilters,
-        page: collectionPage,
-        limit,
-      });
-      setCollections(response.data.data?.collections || []);
-      setCollectionStats(response.data.data?.stats || collectionStats);
-      setCollectionTotal(response.data.total || 0);
-    } catch (error) {
-      showToast("error", getErrorMessage(error, "Failed to load fee collections"));
-    } finally {
-      setCollectionLoading(false);
-    }
-  };
-
-  const fetchStructures = async () => {
-    try {
-      setStructureLoading(true);
-      const response = await getFeeStructures({
-        ...structureFilters,
-        page: structurePage,
-        limit,
-      });
-      setStructures(response.data.data || []);
-      setStructureTotal(response.data.total || 0);
-    } catch (error) {
-      showToast("error", getErrorMessage(error, "Failed to load fee structures"));
-    } finally {
-      setStructureLoading(false);
-    }
-  };
+  // ─── Redux error / success side-effects ───────────────────────────────
+  const reduxError   = useAppSelector((s) => s.fees.error);
+  const reduxSuccess = useAppSelector((s) => s.fees.successMessage);
 
   useEffect(() => {
-    fetchMasters();
-  }, []);
+    if (reduxError) {
+      showToast("error", reduxError);
+      dispatch(clearFeesError());
+    }
+  }, [reduxError, dispatch]);
 
+  useEffect(() => {
+    if (reduxSuccess) {
+      showToast("success", reduxSuccess);
+      dispatch(clearFeesSuccess());
+    }
+  }, [reduxSuccess, dispatch]);
+
+  // ─── Fetch collections ────────────────────────────────────────────────
   useEffect(() => {
     if (activeTab === "collection") {
-      fetchCollections();
+      dispatch(fetchFeeCollectionsThunk({ ...collectionFilters, page: collectionPage, limit }));
     }
-  }, [activeTab, collectionFilters, collectionPage]);
+  }, [activeTab, collectionFilters, collectionPage, dispatch]);
 
+  // ─── Fetch structures ─────────────────────────────────────────────────
   useEffect(() => {
     if (activeTab === "structure") {
-      fetchStructures();
+      dispatch(fetchFeeStructuresThunk({ ...structureFilters, page: structurePage, limit }));
     }
-  }, [activeTab, structureFilters, structurePage]);
+  }, [activeTab, structureFilters, structurePage, dispatch]);
 
+  // ─── Structure CRUD ───────────────────────────────────────────────────
   const validateStructure = () => {
     if (!structureForm.academicYearId) return "Academic Year is required";
     if (!structureForm.classSectionId) return "Class Group is required";
-
     for (const field of ["tuitionFee", "admissionFee", "examFee", "transportFee", "annualCharges"]) {
       if (structureForm[field] === "") return `${field} is required`;
       if (Number(structureForm[field]) < 0) return `${field} cannot be negative`;
     }
-
     for (const [key, value] of Object.entries(structureForm.waivers)) {
       if (value !== "" && (Number(value) < 0 || Number(value) > 100)) {
         return `${key} must be between 0 and 100`;
       }
     }
-
     return null;
   };
 
   const handleSaveStructure = async () => {
     const validationMessage = validateStructure();
-
     if (validationMessage) {
       showToast("error", validationMessage);
       return;
     }
-
     try {
-      setSaving(true);
-      const response = editStructureId
-        ? await updateFeeStructure(editStructureId, structureForm)
-        : await createFeeStructure(structureForm);
-
-      showToast("success", response.data.message);
+      if (editStructureId) {
+        await dispatch(updateFeeStructureThunk({ id: editStructureId, data: structureForm })).unwrap();
+      } else {
+        await dispatch(createFeeStructureThunk(structureForm)).unwrap();
+      }
       setShowStructureModal(false);
       setEditStructureId(null);
       setStructureForm(initialStructureForm);
-      await fetchStructures();
-    } catch (error) {
-      showToast("error", getErrorMessage(error, "Failed to save fee structure"));
-    } finally {
-      setSaving(false);
+      dispatch(fetchFeeStructuresThunk({ ...structureFilters, page: structurePage, limit }));
+    } catch {
+      // error shown via redux side-effect
     }
   };
 
@@ -360,31 +348,21 @@ export default function FeeandFinance() {
 
   const handleDeleteStructure = async () => {
     try {
-      setSaving(true);
-      const response = await deleteFeeStructure(deleteTarget._id);
-      showToast("success", response.data.message);
+      await dispatch(deleteFeeStructureThunk(deleteTarget._id)).unwrap();
       setDeleteTarget(null);
-      await fetchStructures();
-    } catch (error) {
-      showToast("error", getErrorMessage(error, "Failed to delete fee structure"));
-    } finally {
-      setSaving(false);
+      dispatch(fetchFeeStructuresThunk({ ...structureFilters, page: structurePage, limit }));
+    } catch {
+      // error shown via redux side-effect
     }
   };
 
-  const updatePaymentSummary = async (studentId, academicYearId) => {
+  // ─── Payment ──────────────────────────────────────────────────────────
+  const updatePaymentSummary = (studentId, academicYearId) => {
     if (!studentId || !academicYearId) {
-      setPaymentSummary(null);
+      dispatch(clearStudentFeeSummary());
       return;
     }
-
-    try {
-      const response = await getStudentFeeSummary(studentId, { academicYearId });
-      setPaymentSummary(response.data.data);
-    } catch (error) {
-      setPaymentSummary(null);
-      showToast("error", getErrorMessage(error, "Failed to load student fee summary"));
-    }
+    dispatch(fetchStudentFeeSummaryThunk({ studentId, params: { academicYearId } }));
   };
 
   const openPaymentModal = (collection) => {
@@ -394,7 +372,8 @@ export default function FeeandFinance() {
       academicYearId: collection.academicYear._id,
     };
     setPaymentForm(nextForm);
-    setPaymentSummary(collection);
+    // Pre-populate summary from the row data (avoids an extra API call)
+    dispatch(setStudentSummaryFromRow(collection));
     setShowPaymentModal(true);
   };
 
@@ -419,27 +398,22 @@ export default function FeeandFinance() {
 
   const handleRecordPayment = async () => {
     const validationMessage = validatePayment();
-
     if (validationMessage) {
       showToast("error", validationMessage);
       return;
     }
-
     try {
-      setSaving(true);
-      const response = await recordFeePayment(paymentForm);
-      showToast("success", response.data.message);
+      await dispatch(recordFeePaymentThunk(paymentForm)).unwrap();
       setShowPaymentModal(false);
       setPaymentForm(initialPaymentForm);
-      setPaymentSummary(null);
-      await fetchCollections();
-    } catch (error) {
-      showToast("error", getErrorMessage(error, "Failed to record payment"));
-    } finally {
-      setSaving(false);
+      dispatch(clearStudentFeeSummary());
+      dispatch(fetchFeeCollectionsThunk({ ...collectionFilters, page: collectionPage, limit }));
+    } catch {
+      // error shown via redux side-effect
     }
   };
 
+  // ─── Receipts (local – no global value in sharing) ───────────────────
   const handleViewReceipt = async (receiptId) => {
     try {
       const response = await getReceipt(receiptId);
@@ -465,6 +439,7 @@ export default function FeeandFinance() {
     }
   };
 
+  // ─── Export (local async – not shared globally) ───────────────────────
   const handleExport = async (type, format) => {
     try {
       setExporting(`${type}-${format}`);
@@ -475,8 +450,8 @@ export default function FeeandFinance() {
           ? await exportFeeCollectionsPdf(params)
           : await exportFeeCollectionsExcel(params)
         : format === "pdf"
-          ? await exportFeeStructuresPdf(params)
-          : await exportFeeStructuresExcel(params);
+        ? await exportFeeStructuresPdf(params)
+        : await exportFeeStructuresExcel(params);
 
       saveBlob(
         response,
@@ -489,22 +464,24 @@ export default function FeeandFinance() {
     }
   };
 
+  // ─── Filter helpers ───────────────────────────────────────────────────
   const resetCollectionFilter = (key, value) => {
-    setCollectionFilters((current) => ({ ...current, [key]: value }));
+    setCollectionFilters((prev) => ({ ...prev, [key]: value }));
     setCollectionPage(1);
   };
 
   const resetStructureFilter = (key, value) => {
-    setStructureFilters((current) => ({ ...current, [key]: value }));
+    setStructureFilters((prev) => ({ ...prev, [key]: value }));
     setStructurePage(1);
   };
 
+  // ─── Render ───────────────────────────────────────────────────────────
   return (
     <div className="space-y-5 sm:space-y-6">
       <FeeToast toast={toast} onClose={() => setToast(null)} />
 
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold">Fees & Finance</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">Fees &amp; Finance</h1>
         <p className="mt-2 text-sm sm:text-base text-gray-500">
           Manage fee structures, collections, receipts and exports
         </p>
@@ -535,10 +512,10 @@ export default function FeeandFinance() {
       {activeTab === "collection" ? (
         <div className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-4">
-            <Card label="Total Students" value={collectionStats.totalStudents} />
+            <Card label="Total Students"     value={collectionStats.totalStudents} />
             <Card label="Total Fee Collected" value={money(collectionStats.totalCollected)} />
-            <Card label="Pending Amount" value={money(collectionStats.pendingAmount)} />
-            <Card label="Overdue Payments" value={collectionStats.overduePayments} />
+            <Card label="Pending Amount"      value={money(collectionStats.pendingAmount)} />
+            <Card label="Overdue Payments"    value={collectionStats.overduePayments} />
           </div>
 
           <div className="rounded-2xl bg-white p-4 shadow-sm space-y-4">
@@ -618,7 +595,7 @@ export default function FeeandFinance() {
               <div>Status</div>
               <div className="text-right">Actions</div>
             </div>
-            {collectionLoading ? (
+            {listLoading ? (
               <div className="p-4 text-gray-500">Loading...</div>
             ) : collections.length === 0 ? (
               <div className="p-4 text-gray-500">No fee records found</div>
@@ -735,7 +712,7 @@ export default function FeeandFinance() {
               <div>Waivers</div>
               <div className="text-right">Actions</div>
             </div>
-            {structureLoading ? (
+            {listLoading ? (
               <div className="p-4 text-gray-500">Loading...</div>
             ) : structures.length === 0 ? (
               <div className="p-4 text-gray-500">No fee structures found</div>
@@ -784,6 +761,7 @@ export default function FeeandFinance() {
         </div>
       )}
 
+      {/* ── Add / Edit Fee Structure Modal ── */}
       {showStructureModal && (
         <MasterModal
           title={editStructureId ? "Edit Fee Structure" : "Add Fee Structure"}
@@ -799,10 +777,10 @@ export default function FeeandFinance() {
               <button
                 type="button"
                 onClick={handleSaveStructure}
-                disabled={saving}
+                disabled={actionLoading}
                 className="bg-blue-900 text-white px-5 py-2 rounded-lg disabled:opacity-60"
               >
-                {saving ? "Saving..." : editStructureId ? "Update" : "Save"}
+                {actionLoading ? "Saving..." : editStructureId ? "Update" : "Save"}
               </button>
             </div>
           }
@@ -820,12 +798,12 @@ export default function FeeandFinance() {
               options={classSectionOptions}
               onChange={(value) => setStructureForm({ ...structureForm, classSectionId: value })}
             />
-            <Input label="Tuition Fee" type="number" min="0" value={structureForm.tuitionFee} onChange={(value) => setStructureForm({ ...structureForm, tuitionFee: value })} />
-            <Input label="Admission Fee" type="number" min="0" value={structureForm.admissionFee} onChange={(value) => setStructureForm({ ...structureForm, admissionFee: value })} />
-            <Input label="Exam Fee" type="number" min="0" value={structureForm.examFee} onChange={(value) => setStructureForm({ ...structureForm, examFee: value })} />
-            <Input label="Transport Fee" type="number" min="0" value={structureForm.transportFee} onChange={(value) => setStructureForm({ ...structureForm, transportFee: value })} />
+            <Input label="Tuition Fee"    type="number" min="0" value={structureForm.tuitionFee}    onChange={(value) => setStructureForm({ ...structureForm, tuitionFee: value })} />
+            <Input label="Admission Fee"  type="number" min="0" value={structureForm.admissionFee}  onChange={(value) => setStructureForm({ ...structureForm, admissionFee: value })} />
+            <Input label="Exam Fee"       type="number" min="0" value={structureForm.examFee}       onChange={(value) => setStructureForm({ ...structureForm, examFee: value })} />
+            <Input label="Transport Fee"  type="number" min="0" value={structureForm.transportFee}  onChange={(value) => setStructureForm({ ...structureForm, transportFee: value })} />
             <Input label="Annual Charges" type="number" min="0" value={structureForm.annualCharges} onChange={(value) => setStructureForm({ ...structureForm, annualCharges: value })} />
-            <Input label="Due Date" type="date" value={structureForm.dueDate} onChange={(value) => setStructureForm({ ...structureForm, dueDate: value })} />
+            <Input label="Due Date"       type="date"           value={structureForm.dueDate}       onChange={(value) => setStructureForm({ ...structureForm, dueDate: value })} />
             <div className="rounded-xl bg-gray-50 p-3">
               <p className="text-sm font-semibold mb-3">Fee Waivers</p>
               <p className="text-xs text-gray-500 mb-3">
@@ -834,10 +812,10 @@ export default function FeeandFinance() {
               <div className="grid gap-3 md:grid-cols-2">
                 {[
                   ["staffChildDiscount", "Staff Child Discount %"],
-                  ["scDiscount", "SC Discount %"],
-                  ["stDiscount", "ST Discount %"],
-                  ["obcDiscount", "OBC Discount %"],
-                  ["ewsDiscount", "EWS Discount %"],
+                  ["scDiscount",         "SC Discount %"],
+                  ["stDiscount",         "ST Discount %"],
+                  ["obcDiscount",        "OBC Discount %"],
+                  ["ewsDiscount",        "EWS Discount %"],
                 ].map(([key, label]) => (
                   <Input
                     key={key}
@@ -859,6 +837,7 @@ export default function FeeandFinance() {
         </MasterModal>
       )}
 
+      {/* ── Record Payment Modal ── */}
       {showPaymentModal && (
         <MasterModal
           title="Record Payment"
@@ -874,10 +853,10 @@ export default function FeeandFinance() {
               <button
                 type="button"
                 onClick={handleRecordPayment}
-                disabled={saving}
+                disabled={actionLoading}
                 className="bg-blue-900 text-white px-5 py-2 rounded-lg disabled:opacity-60"
               >
-                {saving ? "Saving..." : "Record Payment"}
+                {actionLoading ? "Saving..." : "Record Payment"}
               </button>
             </div>
           }
@@ -917,8 +896,8 @@ export default function FeeandFinance() {
               options={feeHeads.map((item) => ({ label: item, value: item }))}
               onChange={(value) => setPaymentForm({ ...paymentForm, feeHead: value })}
             />
-            <Input label="Payment Date" type="date" value={paymentForm.paymentDate} onChange={(value) => setPaymentForm({ ...paymentForm, paymentDate: value })} />
-            <Input label="Amount Paid" type="number" min="1" value={paymentForm.amountPaid} onChange={(value) => setPaymentForm({ ...paymentForm, amountPaid: value })} />
+            <Input label="Payment Date"          type="date"   value={paymentForm.paymentDate}         onChange={(value) => setPaymentForm({ ...paymentForm, paymentDate: value })} />
+            <Input label="Amount Paid"           type="number" min="1" value={paymentForm.amountPaid}  onChange={(value) => setPaymentForm({ ...paymentForm, amountPaid: value })} />
             <Select
               label="Payment Mode"
               value={paymentForm.paymentMode}
@@ -938,6 +917,7 @@ export default function FeeandFinance() {
         </MasterModal>
       )}
 
+      {/* ── Delete Confirmation Modal ── */}
       {deleteTarget && (
         <MasterModal
           title="Delete Fee Structure"
@@ -953,10 +933,10 @@ export default function FeeandFinance() {
               <button
                 type="button"
                 onClick={handleDeleteStructure}
-                disabled={saving}
+                disabled={actionLoading}
                 className="bg-red-600 text-white px-5 py-2 rounded-lg disabled:opacity-60"
               >
-                {saving ? "Deleting..." : "Delete"}
+                {actionLoading ? "Deleting..." : "Delete"}
               </button>
             </div>
           }
@@ -967,6 +947,7 @@ export default function FeeandFinance() {
         </MasterModal>
       )}
 
+      {/* ── Receipt Modal ── */}
       {receipt && (
         <MasterModal
           title="Fee Receipt"

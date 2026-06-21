@@ -1,42 +1,35 @@
 import { useEffect, useState } from "react";
 import { FaTrash } from "react-icons/fa";
 import MasterModal from "../../components/masters/MasterModal";
-import { deleteStudent, getStudents } from "../../services/studentService";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import {
+  fetchStudentsThunk,
+  deleteStudentThunk,
+  clearStudentError,
+  clearStudentSuccess,
+} from "../../redux/features/students/studentsSlice";
 
 const Student = () => {
-  const [students, setStudents] = useState([]);
+  const dispatch = useAppDispatch();
+  const { list: students, loading, error, successMessage } = useAppSelector(
+    (state) => state.students
+  );
+
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const [deleteTarget, setDeleteTarget] = useState(null);
 
-  const fetchStudents = async () => {
-    try {
-      setLoading(true);
-      const response = await getStudents({ search, status });
-      setStudents(response.data.data || []);
-    } catch (error) {
-      setError(error?.response?.data?.message || "Failed to load students");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchStudents();
-  }, [search, status]);
+    dispatch(fetchStudentsThunk({ search, status }));
+  }, [dispatch, search, status]);
 
   const handleDeleteStudent = async () => {
-    try {
-      setError("");
-      const response = await deleteStudent(deleteTarget._id);
-      setSuccessMessage(response.data.message);
-      setDeleteTarget(null);
-      await fetchStudents();
-    } catch (error) {
-      setError(error?.response?.data?.message || "Failed to delete student");
+    if (deleteTarget) {
+      const resultAction = await dispatch(deleteStudentThunk(deleteTarget._id));
+      if (deleteStudentThunk.fulfilled.match(resultAction)) {
+        setDeleteTarget(null);
+        dispatch(fetchStudentsThunk({ search, status }));
+      }
     }
   };
 

@@ -10,7 +10,11 @@ const FeeToast = ({ toast, onClose }) => {
       }`}
     >
       <div className="flex items-start justify-between gap-4">
-        <p className="text-sm font-medium">{toast.message}</p>
+        <p className="text-sm font-medium">
+          {typeof toast.message === "string"
+            ? toast.message
+            : toast.message?.message || "An error occurred"}
+        </p>
         <button
           type="button"
           onClick={onClose}

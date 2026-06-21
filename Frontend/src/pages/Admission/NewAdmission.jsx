@@ -4,10 +4,7 @@ import PersonalInfo from "./PersonalInfo";
 import GuardianInfo from "./GuardianInfo";
 import AcademicInfo from "./AcademicInfo";
 import Documents from "./Documents";
-import {
-  categoryService,
-  classSectionService,
-} from "../../services/masterSetupServices";
+import { useAppSelector } from "../../redux/hooks";
 import { createStudent } from "../../services/studentService";
 
 const initialForm = {
@@ -81,27 +78,11 @@ const validations = {
 const NewAdmission = () => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState(initialForm);
-  const [categories, setCategories] = useState([]);
-  const [classSections, setClassSections] = useState([]);
+  const categories = useAppSelector((state) => state.master.categories);
+  const classSections = useAppSelector((state) => state.master.classSections);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const fetchMasters = async () => {
-      const [categoryResponse, classResponse] = await Promise.all([
-        categoryService.getAll(),
-        classSectionService.getAll(),
-      ]);
-
-      setCategories(categoryResponse.data.data || []);
-      setClassSections(classResponse.data.data || []);
-    };
-
-    fetchMasters().catch(() => {
-      setError("Failed to load Master Setup dropdowns");
-    });
-  }, []);
 
   const sections = useMemo(
     () =>

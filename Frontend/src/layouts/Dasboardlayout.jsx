@@ -1,10 +1,17 @@
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import { Outlet } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAppDispatch } from "../redux/hooks";
+import { fetchMasterDataThunk } from "../redux/features/master/masterSlice";
 
 function DashboardLayout() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(fetchMasterDataThunk());
+  }, [dispatch]);
 
   return (
     <div className="min-h-screen bg-slate-50 md:pl-[280px]">

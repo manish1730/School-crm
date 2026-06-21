@@ -1,30 +1,40 @@
 import { useEffect, useMemo, useState } from "react";
-import { classSectionService } from "../../services/masterSetupServices";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { selectAllClasses, selectAllSections } from "../../redux/features/master/masterSlice";
 import {
-  getStudentAttendance,
-  saveStudentAttendance,
-} from "../../services/studentAttendanceService";
+  fetchStudentAttendanceThunk,
+  saveStudentAttendanceThunk,
+  clearAttendanceError,
+  clearAttendanceSuccess,
+} from "../../redux/features/attendance/attendanceSlice";
 
 const statuses = ["Present", "Absent", "Leave"];
 
 const Attendence = () => {
-  const [classSections, setClassSections] = useState([]);
+  const dispatch = useAppDispatch();
+  const classSections = useAppSelector((state) => state.master.classSections);
+  const {
+    students,
+    records,
+    stats,
+    error: reduxError,
+    successMessage: reduxSuccess,
+  } = useAppSelector((state) => state.attendance);
+
   const [className, setClassName] = useState("");
   const [sectionName, setSectionName] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
-  const [students, setStudents] = useState([]);
-  const [records, setRecords] = useState([]);
   const [attendance, setAttendance] = useState({});
-  const [stats, setStats] = useState({ totalStudents: 0, present: 0, absent: 0, leave: 0 });
-  const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+  const [localError, setLocalError] = useState("");
+  const [localSuccess, setLocalSuccess] = useState("");
+
+  const error = localError || reduxError;
+  const successMessage = localSuccess || reduxSuccess;
 
   useEffect(() => {
-    classSectionService
-      .getAll()
-      .then((response) => setClassSections(response.data.data || []))
-      .catch(() => setError("Failed to load class and section master data"));
-  }, []);
+    dispatch(clearAttendanceError());
+    dispatch(clearAttendanceSuccess());
+  }, [dispatch]);
 
   const classes = useMemo(
     () => [...new Set(classSections.map((item) => item.className))],
@@ -41,17 +51,8 @@ const Attendence = () => {
 
   const fetchAttendance = async () => {
     if (!className || !sectionName) return;
-
-    try {
-      setError("");
-      const response = await getStudentAttendance({ className, sectionName, date });
-      setStudents(response.data.data.students || []);
-      setRecords(response.data.data.records || []);
-      setStats(response.data.data.stats || stats);
-      setAttendance({});
-    } catch (error) {
-      setError(error?.response?.data?.message || "Failed to load attendance");
-    }
+    dispatch(fetchStudentAttendanceThunk({ className, sectionName, date }));
+    setAttendance({});
   };
 
   useEffect(() => {
@@ -62,26 +63,27 @@ const Attendence = () => {
     records.find((record) => record.studentId === studentId)?.status;
 
   const handleSaveAttendance = async () => {
-    try {
-      setError("");
-      setSuccessMessage("");
+    setLocalError("");
+    setLocalSuccess("");
+    dispatch(clearAttendanceError());
+    dispatch(clearAttendanceSuccess());
 
-      const entries = students.map((student) => ({
-        studentId: student._id,
-        status: attendance[student._id] || getMarkedStatus(student._id) || "Present",
-      }));
+    const entries = students.map((student) => ({
+      studentId: student._id,
+      status: attendance[student._id] || getMarkedStatus(student._id) || "Present",
+    }));
 
-      const response = await saveStudentAttendance({
+    const resultAction = await dispatch(
+      saveStudentAttendanceThunk({
         className,
         sectionName,
         attendanceDate: date,
         entries,
-      });
+      })
+    );
 
-      setSuccessMessage(response.data.message);
-      await fetchAttendance();
-    } catch (error) {
-      setError(error?.response?.data?.message || "Failed to save attendance");
+    if (saveStudentAttendanceThunk.fulfilled.match(resultAction)) {
+      fetchAttendance();
     }
   };
 

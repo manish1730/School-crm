@@ -14,36 +14,25 @@ import {
   FaSignOutAlt,
   FaUserPlus,
 } from "react-icons/fa";
-import { NavLink, useLocation,useNavigate} from "react-router-dom";
-import { getAcademicYears } from "../services/academicYearServices";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
+import { fetchMasterDataThunk, selectActiveAcademicYear } from "../redux/features/master/masterSlice";
+import { logoutUserThunk } from "../redux/features/auth/authSlice";
 
 import logo from "../assets/logo.png";
 
 const Sidebar = ({ mobileOpen = false, onClose = () => {} }) => {
   const location = useLocation();
-  const [activeYearName, setActiveYearName] = useState("Loading...");
+  const dispatch = useAppDispatch();
+  const activeYearName = useAppSelector((state) => selectActiveAcademicYear(state)?.name || "Loading...");
 
   useEffect(() => {
-    const fetchActiveYear = async () => {
-      try {
-        const response = await getAcademicYears();
-        const years = response.data.data || [];
-        const currentYear = years.find((y) => y.isCurrent) || years[0];
-        if (currentYear) {
-          setActiveYearName(currentYear.name);
-        } else {
-          setActiveYearName("N/A");
-        }
-      } catch (err) {
-        console.error("Failed to fetch active academic year", err);
-        setActiveYearName("Error");
-      }
-    };
-
-    fetchActiveYear();
-    const interval = setInterval(fetchActiveYear, 5000); // poll every 5 seconds to stay updated dynamically
+    dispatch(fetchMasterDataThunk());
+    const interval = setInterval(() => {
+      dispatch(fetchMasterDataThunk());
+    }, 5000 * 60); // poll every 5 minutes to stay updated dynamically
     return () => clearInterval(interval);
-  }, []);
+  }, [dispatch]);
 
   const menu = [
     { icon: <FaHome />, name: "Dashboard", path: "/Dashboard" },
@@ -119,16 +108,17 @@ const Sidebar = ({ mobileOpen = false, onClose = () => {} }) => {
 const SidebarContent = ({ menu, activeYearName }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useAppDispatch();
   const activeDropdownIndex = menu.findIndex((item) =>
     item.subRoutes?.some((sub) => sub.path === location.pathname)
   );
   const [openDropdown, setOpenDropdown] = useState(
     activeDropdownIndex === -1 ? null : activeDropdownIndex
   );
-  const handleLogout = () => {
-  localStorage.removeItem("token");
-  navigate("/Login");
-};
+  const handleLogout = async () => {
+    await dispatch(logoutUserThunk());
+    navigate("/Login");
+  };
 
   return (
     <>

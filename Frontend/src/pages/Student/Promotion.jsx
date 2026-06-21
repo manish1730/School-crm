@@ -1,31 +1,39 @@
 import { useState, useEffect } from "react";
-import { classSectionService } from "../../services/masterSetupServices";
-import { getStudents, promoteStudents } from "../../services/studentService";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { fetchMasterDataThunk } from "../../redux/features/master/masterSlice";
+import {
+  fetchStudentsThunk,
+  promoteStudentsThunk,
+  clearStudentError,
+  clearStudentSuccess,
+} from "../../redux/features/students/studentsSlice";
 
 const Promotion = () => {
-  const [classSections, setClassSections] = useState([]);
+  const dispatch = useAppDispatch();
+  const classSections = useAppSelector((state) => state.master.classSections || []);
+  const {
+    list: students,
+    loading,
+    actionLoading: promoting,
+    error: studentError,
+    successMessage: studentSuccess,
+  } = useAppSelector((state) => state.students);
+
   const [fromClass, setFromClass] = useState("");
   const [fromSection, setFromSection] = useState("");
   const [toClass, setToClass] = useState("");
   const [toSection, setToSection] = useState("");
-  const [students, setStudents] = useState([]);
   const [selected, setSelected] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [promoting, setPromoting] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [localError, setLocalError] = useState("");
+
+  const error = localError || studentError;
+  const success = studentSuccess;
 
   useEffect(() => {
-    const fetchClassSections = async () => {
-      try {
-        const response = await classSectionService.getAll();
-        setClassSections(response.data.data || []);
-      } catch (err) {
-        setError("Failed to load class data");
-      }
-    };
-    fetchClassSections();
-  }, []);
+    dispatch(fetchMasterDataThunk());
+    dispatch(clearStudentError());
+    dispatch(clearStudentSuccess());
+  }, [dispatch]);
 
   const uniqueClasses = [...new Set(classSections.map((cs) => cs.className))];
 
@@ -36,34 +44,17 @@ const Promotion = () => {
 
   useEffect(() => {
     setFromSection("");
-    setStudents([]);
     setSelected([]);
   }, [fromClass]);
 
   useEffect(() => {
     if (!fromClass || !fromSection) {
-      setStudents([]);
       setSelected([]);
       return;
     }
-    const fetchStudents = async () => {
-      try {
-        setLoading(true);
-        setError("");
-        const response = await getStudents({
-          className: fromClass,
-          sectionName: fromSection,
-        });
-        setStudents(response.data.data || []);
-        setSelected([]);
-      } catch (err) {
-        setError("Failed to load students");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchStudents();
-  }, [fromClass, fromSection]);
+    dispatch(fetchStudentsThunk({ className: fromClass, sectionName: fromSection }));
+    setSelected([]);
+  }, [dispatch, fromClass, fromSection]);
 
   useEffect(() => {
     setToSection("");
@@ -84,50 +75,41 @@ const Promotion = () => {
   };
 
   const handlePromote = async () => {
-    setError("");
-    setSuccess("");
+    setLocalError("");
+    dispatch(clearStudentError());
+    dispatch(clearStudentSuccess());
 
     if (!fromClass || !fromSection) {
-      setError("Please select From Class and Section");
+      setLocalError("Please select From Class and Section");
       return;
     }
     if (!toClass || !toSection) {
-      setError("Please select To Class and Section");
+      setLocalError("Please select To Class and Section");
       return;
     }
     if (fromClass === toClass && fromSection === toSection) {
-      setError("Cannot promote student to same class and section");
+      setLocalError("Cannot promote student to same class and section");
       return;
     }
     if (selected.length === 0) {
-      setError("Please select at least one student");
+      setLocalError("Please select at least one student");
       return;
     }
 
-    try {
-      setPromoting(true);
-      const response = await promoteStudents({
+    const resultAction = await dispatch(
+      promoteStudentsThunk({
         fromClass,
         fromSection,
         toClass,
         toSection,
         studentIds: selected,
-      });
-      setSuccess(response.data.message || "Student promoted successfully");
-      setSelected([]);
+      })
+    );
 
+    if (promoteStudentsThunk.fulfilled.match(resultAction)) {
+      setSelected([]);
       // Refresh student list
-      const res = await getStudents({
-        className: fromClass,
-        sectionName: fromSection,
-      });
-      setStudents(res.data.data || []);
-    } catch (err) {
-      setError(
-        err?.response?.data?.message || "Failed to promote students"
-      );
-    } finally {
-      setPromoting(false);
+      dispatch(fetchStudentsThunk({ className: fromClass, sectionName: fromSection }));
     }
   };
 

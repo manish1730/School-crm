@@ -1,24 +1,15 @@
 import { useEffect, useState } from "react";
 import MasterCrudPage from "../../components/masters/MasterCrudPage";
+import { selectDepartments, selectDesignations } from "../../redux/features/master/masterSlice";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import {
-  departmentService,
-  designationService,
-} from "../../services/masterSetupServices";
-import {
-  createStaff,
-  deleteStaff,
-  getStaff,
-  updateStaff,
-} from "../../services/staffService";
+  fetchStaffThunk,
+  createStaffThunk,
+  updateStaffThunk,
+  deleteStaffThunk,
+} from "../../redux/features/staff/staffSlice";
 
 const erpRoles = ["Teacher", "Accountant", "Admin", "Receptionist", "Transport Manager"];
-
-const staffCrudService = {
-  getAll: getStaff,
-  create: createStaff,
-  update: updateStaff,
-  remove: deleteStaff,
-};
 
 const columns = [
   { key: "employeeId", label: "Employee ID" },
@@ -48,23 +39,14 @@ const validate = ({ fullName, email, phone, dob, gender, department, designation
 };
 
 export default function AllStaff() {
-  const [departmentOptions, setDepartmentOptions] = useState([]);
-  const [designationOptions, setDesignationOptions] = useState([]);
+  const dispatch = useAppDispatch();
+  const { list: staffList, loading, error } = useAppSelector((state) => state.staff);
 
-  useEffect(() => {
-    const fetchMasters = async () => {
-      const [departments, designations] = await Promise.all([
-        departmentService.getAll(),
-        designationService.getAll(),
-      ]);
-      setDepartmentOptions((departments.data.data || []).map((item) => ({ label: item.departmentName, value: item.departmentName })));
-      setDesignationOptions((designations.data.data || []).map((item) => ({ label: item.designationName, value: item.designationName })));
-    };
-    fetchMasters().catch(() => {
-      setDepartmentOptions([]);
-      setDesignationOptions([]);
-    });
-  }, []);
+  const rawDepartments = useAppSelector(selectDepartments);
+  const rawDesignations = useAppSelector(selectDesignations);
+
+  const departmentOptions = rawDepartments.map(item => ({ label: item.departmentName, value: item.departmentName }));
+  const designationOptions = rawDesignations.map(item => ({ label: item.designationName, value: item.designationName }));
 
   const fields = [
     { name: "fullName", label: "Full Name" },
@@ -90,7 +72,20 @@ export default function AllStaff() {
       title="All Staff"
       description="Create and manage staff profiles."
       entityName="Staff"
-      service={staffCrudService}
+      reduxRecords={staffList}
+      reduxLoading={loading}
+      reduxError={error}
+      onFetchRedux={(params) => dispatch(fetchStaffThunk(params))}
+      onSaveRedux={async (id, payload) => {
+        if (id) {
+          await dispatch(updateStaffThunk({ id, data: payload }));
+        } else {
+          await dispatch(createStaffThunk(payload));
+        }
+      }}
+      onDeleteRedux={async (id) => {
+        await dispatch(deleteStaffThunk(id));
+      }}
       fields={fields}
       columns={columns}
       validate={validate}

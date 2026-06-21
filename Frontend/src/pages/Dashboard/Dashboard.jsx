@@ -36,85 +36,41 @@ import {
   AreaChart,
   Area,
 } from "recharts";
-import {
-  getCardsAnalytics,
-  getAttendanceTrend,
-  getEnquiryFunnel,
-  getCollectionTrend,
-  getRecentActivities,
-  getTodayBirthdays,
-} from "../../services/dashboardService";
-import { getSchoolProfile } from "../../services/schoolProfileService";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { fetchDashboardDataThunk } from "../../redux/features/dashboard/dashboardSlice";
+import { fetchSchoolProfileThunk } from "../../redux/features/settings/settingsSlice";
 
 // Colors for enquiry donut chart
 const FUNNEL_COLORS = ["#3b82f6", "#06b6d4", "#10b981", "#ef4444"]; // Blue, Cyan, Green, Red
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
-  const [cards, setCards] = useState({
-    totalStudents: 0,
-    totalStaff: 0,
-    todayAttendance: 0,
-    feeToday: 0,
-    feeMonth: 0,
-    pendingDues: 0,
-    upcomingEvents: 0,
-  });
-  const [attendanceData, setAttendanceData] = useState([]);
-  const [enquiryData, setEnquiryData] = useState([]);
-  const [collectionData, setCollectionData] = useState([]);
-  const [activities, setActivities] = useState([]);
-  const [birthdays, setBirthdays] = useState([]);
-  const [schoolProfile, setSchoolProfile] = useState(null);
+  const {
+    cards,
+    attendanceData,
+    enquiryData,
+    collectionData,
+    activities,
+    birthdays,
+    loading: dashboardLoading,
+    error: dashboardError,
+  } = useAppSelector((state) => state.dashboard);
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const {
+    schoolProfile,
+    loading: profileLoading,
+    error: profileError,
+  } = useAppSelector((state) => state.settings);
+
+  const loading = dashboardLoading || profileLoading;
+  const error = dashboardError || profileError;
 
   useEffect(() => {
-    const fetchAllDashboardData = async () => {
-      try {
-        setLoading(true);
-        setError("");
-
-        const [
-          cardsRes,
-          attendanceRes,
-          enquiryRes,
-          collectionRes,
-          activitiesRes,
-          birthdaysRes,
-          schoolProfileRes,
-        ] = await Promise.all([
-          getCardsAnalytics(),
-          getAttendanceTrend(),
-          getEnquiryFunnel(),
-          getCollectionTrend(),
-          getRecentActivities(),
-          getTodayBirthdays(),
-          getSchoolProfile().catch((e) => {
-            console.error("School Profile load error", e);
-            return { data: { data: null } };
-          }),
-        ]);
-
-        setCards(cardsRes.data.data);
-        setAttendanceData(attendanceRes.data.data);
-        setEnquiryData(enquiryRes.data.data);
-        setCollectionData(collectionRes.data.data);
-        setActivities(activitiesRes.data.data);
-        setBirthdays(birthdaysRes.data.data);
-        setSchoolProfile(schoolProfileRes?.data?.data);
-      } catch (err) {
-        console.error("Dashboard data fetch error:", err);
-        setError("Failed to load dashboard statistics. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAllDashboardData();
-  }, []);
+    dispatch(fetchDashboardDataThunk());
+    dispatch(fetchSchoolProfileThunk());
+  }, [dispatch]);
 
   const formatCurrency = (value) => {
     if (value >= 100000) {

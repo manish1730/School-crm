@@ -1,37 +1,56 @@
 import { useEffect, useState } from "react";
 import MasterModal from "../../components/masters/MasterModal";
-import { generatePayroll, getPayroll, getStaff } from "../../services/staffService";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import {
+  fetchStaffThunk,
+  fetchPayrollThunk,
+  generatePayrollThunk,
+  clearStaffError,
+  clearStaffSuccess,
+} from "../../redux/features/staff/staffSlice";
 
 const initialForm = { staffId: "", payrollMonth: "", allowance: 0, deduction: 0, status: "Pending" };
 
 export default function Payroll() {
-  const [staff, setStaff] = useState([]);
-  const [payroll, setPayroll] = useState([]);
-  const [stats, setStats] = useState({ totalPayroll: 0, paid: 0, pending: 0, processing: 0 });
+  const dispatch = useAppDispatch();
+  const {
+    list: staff,
+    payroll,
+    payrollStats: stats,
+    error: reduxError,
+    successMessage: reduxSuccess,
+  } = useAppSelector((state) => state.staff);
+
   const [formData, setFormData] = useState(initialForm);
   const [showModal, setShowModal] = useState(false);
-  const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+  const [localError, setLocalError] = useState("");
+  const [localSuccess, setLocalSuccess] = useState("");
+
+  const error = localError || reduxError;
+  const successMessage = localSuccess || reduxSuccess;
 
   const fetchData = async () => {
-    const [staffResponse, payrollResponse] = await Promise.all([getStaff(), getPayroll()]);
-    setStaff(staffResponse.data.data || []);
-    setPayroll(payrollResponse.data.data.payroll || []);
-    setStats(payrollResponse.data.data.stats || stats);
+    dispatch(fetchStaffThunk());
+    dispatch(fetchPayrollThunk());
   };
 
-  useEffect(() => { fetchData().catch(() => setError("Failed to load payroll")); }, []);
+  useEffect(() => {
+    dispatch(clearStaffError());
+    dispatch(clearStaffSuccess());
+    fetchData();
+  }, [dispatch]);
 
   const handleGeneratePayroll = async () => {
-    try {
-      setError("");
-      const response = await generatePayroll(formData);
-      setSuccessMessage(response.data.message);
+    setLocalError("");
+    setLocalSuccess("");
+    dispatch(clearStaffError());
+    dispatch(clearStaffSuccess());
+
+    const resultAction = await dispatch(generatePayrollThunk(formData));
+    if (generatePayrollThunk.fulfilled.match(resultAction)) {
       setShowModal(false);
       setFormData(initialForm);
-      await fetchData();
-    } catch (error) {
-      setError(error?.response?.data?.message || "Failed to generate payroll");
+      fetchData();
     }
   };
 

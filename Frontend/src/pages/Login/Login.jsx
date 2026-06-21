@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
-import { loginUser } from "../../services/authService";
-import { useState } from "react";
+import { loginUserThunk, clearAuthError, clearSuccessMessage } from "../../redux/features/auth/authSlice";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { useState, useEffect } from "react";
 import {
   FiArrowRight,
   FiEye,
@@ -236,44 +237,31 @@ function LoginCard({
 }
 
 export default function Login() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
-  const handleSubmit = async(event) => {
-    event.preventDefault()
-    setError("");
-    setSuccessMessage("");
+
+  const { loading, error, successMessage } = useAppSelector(
+    (state) => state.auth
+  );
+
+  useEffect(() => {
+    // Clear any stale errors/messages on mount
+    dispatch(clearAuthError());
+    dispatch(clearSuccessMessage());
+  }, [dispatch]);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const resultAction = await dispatch(loginUserThunk({ email, password }));
     
-  try {
-   const response = await loginUser({
-      email,
-      password,
-    });
-    localStorage.setItem(
-      "token",
-      response.token
-    );
-
-    setSuccessMessage(
-      response.message
-    );
-
-    setTimeout(() => {
-      navigate("/Dashboard");
-    }, 1000);
-
-  } catch (error) {
-
-    console.log(error);
-
-    setError(
-      error?.response?.data?.message
-    );
-
-  }
-  }
+    if (loginUserThunk.fulfilled.match(resultAction)) {
+      setTimeout(() => {
+        navigate("/Dashboard");
+      }, 1000);
+    }
+  };
 
   return (
     <main className="flex min-h-screen overflow-hidden bg-[#030B3D] font-sans text-white lg:h-screen">
