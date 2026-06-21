@@ -152,6 +152,66 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* QUICK ACTIONS SECTION */}
+      <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm mb-6">
+        <h2 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h2>
+        <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
+          {/* Add Student */}
+          <button
+            onClick={() => navigate("/Students/All-Students")}
+            className="flex flex-col items-center justify-center p-4 rounded-xl border border-gray-100 bg-gray-50 hover:bg-blue-50 hover:border-blue-100 transition-colors text-center cursor-pointer"
+          >
+            <FaUserPlus className="h-5 w-5 text-blue-600 mb-2" />
+            <span className="text-xs font-bold text-gray-700">Add Student</span>
+          </button>
+
+          {/* New Admission */}
+          <button
+            onClick={() => navigate("/Admission/New-Admission")}
+            className="flex flex-col items-center justify-center p-4 rounded-xl border border-gray-100 bg-gray-50 hover:bg-blue-50 hover:border-blue-100 transition-colors text-center cursor-pointer"
+          >
+            <FaUserPlus className="h-5 w-5 text-teal-600 mb-2" />
+            <span className="text-xs font-bold text-gray-700">New Admission</span>
+          </button>
+
+          {/* Record Fee */}
+          <button
+            onClick={() => navigate("/Fees")}
+            className="flex flex-col items-center justify-center p-4 rounded-xl border border-gray-100 bg-gray-50 hover:bg-blue-50 hover:border-blue-100 transition-colors text-center cursor-pointer"
+          >
+            <FaFileInvoiceDollar className="h-5 w-5 text-emerald-600 mb-2" />
+            <span className="text-xs font-bold text-gray-700">Record Fee</span>
+          </button>
+
+          {/* Mark Attendance */}
+          <button
+            onClick={() => navigate("/Attendence")}
+            className="flex flex-col items-center justify-center p-4 rounded-xl border border-gray-100 bg-gray-50 hover:bg-blue-50 hover:border-blue-100 transition-colors text-center cursor-pointer"
+          >
+            <FaClipboardCheck className="h-5 w-5 text-purple-600 mb-2" />
+            <span className="text-xs font-bold text-gray-700">Mark Attendance</span>
+          </button>
+
+          {/* Add Staff */}
+          <button
+            onClick={() => navigate("/Staff/All-Staff")}
+            className="flex flex-col items-center justify-center p-4 rounded-xl border border-gray-100 bg-gray-50 hover:bg-blue-50 hover:border-blue-100 transition-colors text-center cursor-pointer"
+          >
+            <FaChalkboardTeacher className="h-5 w-5 text-indigo-600 mb-2" />
+            <span className="text-xs font-bold text-gray-700">Add Staff</span>
+          </button>
+
+          {/* Create Event */}
+          <button
+            onClick={() => navigate("/Settings/Masters")}
+            className="flex flex-col items-center justify-center p-4 rounded-xl border border-gray-100 bg-gray-50 hover:bg-blue-50 hover:border-blue-100 transition-colors text-center cursor-pointer"
+          >
+            <FaCalendarAlt className="h-5 w-5 text-pink-600 mb-2" />
+            <span className="text-xs font-bold text-gray-700">Create Event</span>
+          </button>
+        </div>
+      </div>
+
       {/* HEADER SECTION */}
       <div className="flex flex-col gap-1">
         <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
@@ -458,66 +518,6 @@ export default function Dashboard() {
               </div>
             )}
           </div>
-        </div>
-      </div>
-
-      {/* QUICK ACTIONS SECTION */}
-      <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-        <h2 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h2>
-        <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
-          {/* Add Student */}
-          <button
-            onClick={() => navigate("/Students/All-Students")}
-            className="flex flex-col items-center justify-center p-4 rounded-xl border border-gray-100 bg-gray-50 hover:bg-blue-50 hover:border-blue-100 transition-colors text-center cursor-pointer"
-          >
-            <FaUserPlus className="h-5 w-5 text-blue-600 mb-2" />
-            <span className="text-xs font-bold text-gray-700">Add Student</span>
-          </button>
-
-          {/* New Admission */}
-          <button
-            onClick={() => navigate("/Admission/New-Admission")}
-            className="flex flex-col items-center justify-center p-4 rounded-xl border border-gray-100 bg-gray-50 hover:bg-blue-50 hover:border-blue-100 transition-colors text-center cursor-pointer"
-          >
-            <FaUserPlus className="h-5 w-5 text-teal-600 mb-2" />
-            <span className="text-xs font-bold text-gray-700">New Admission</span>
-          </button>
-
-          {/* Record Fee */}
-          <button
-            onClick={() => navigate("/Fees")}
-            className="flex flex-col items-center justify-center p-4 rounded-xl border border-gray-100 bg-gray-50 hover:bg-blue-50 hover:border-blue-100 transition-colors text-center cursor-pointer"
-          >
-            <FaFileInvoiceDollar className="h-5 w-5 text-emerald-600 mb-2" />
-            <span className="text-xs font-bold text-gray-700">Record Fee</span>
-          </button>
-
-          {/* Mark Attendance */}
-          <button
-            onClick={() => navigate("/Attendence")}
-            className="flex flex-col items-center justify-center p-4 rounded-xl border border-gray-100 bg-gray-50 hover:bg-blue-50 hover:border-blue-100 transition-colors text-center cursor-pointer"
-          >
-            <FaClipboardCheck className="h-5 w-5 text-purple-600 mb-2" />
-            <span className="text-xs font-bold text-gray-700">Mark Attendance</span>
-          </button>
-
-          {/* Add Staff */}
-          <button
-            onClick={() => navigate("/Staff/All-Staff")}
-            className="flex flex-col items-center justify-center p-4 rounded-xl border border-gray-100 bg-gray-50 hover:bg-blue-50 hover:border-blue-100 transition-colors text-center cursor-pointer"
-          >
-            <FaChalkboardTeacher className="h-5 w-5 text-indigo-600 mb-2" />
-            <span className="text-xs font-bold text-gray-700">Add Staff</span>
-          </button>
-
-          {/* Create Event */}
-          <button
-            onClick={() => navigate("/Settings/Masters")}
-            className="flex flex-col items-center justify-center p-4 rounded-xl border border-gray-100 bg-gray-50 hover:bg-blue-50 hover:border-blue-100 transition-colors text-center cursor-pointer"
-          >
-            <FaCalendarAlt className="h-5 w-5 text-pink-600 mb-2" />
-            <span className="text-xs font-bold text-gray-700">Create Event</span>
-          </button>
         </div>
       </div>
     </div>

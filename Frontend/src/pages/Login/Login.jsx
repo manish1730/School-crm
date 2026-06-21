@@ -98,12 +98,13 @@ function TextField({
   icon: Icon,
   trailing,
   value,
-  onChange
+  onChange,
+  required
 }){
   return (
     <label htmlFor={id} className="block">
       <span className="mb-[13px] block text-[18px] font-extrabold leading-none text-[#0E1539]">
-        {label}
+        {label} {required && <span className="text-red-500 ml-0.5">*</span>}
       </span>
       <span className="flex h-[65px] items-center rounded-[16px] border border-[#DDE2EE] bg-white px-[22px] shadow-[0_0_0_1px_rgba(19,30,63,0.015)] focus-within:border-[#7145FF] focus-within:ring-4 focus-within:ring-[#7145FF]/10">
         <Icon className="mr-[20px] h-[25px] w-[25px] shrink-0 text-[#828BA9]" aria-hidden="true" />
@@ -156,6 +157,7 @@ function LoginCard({
   onChange={(e) =>
     setEmail(e.target.value)
   }
+  required
 />
         <TextField
   id="password"
@@ -167,6 +169,7 @@ function LoginCard({
   onChange={(e) =>
     setPassword(e.target.value)
   }
+  required
           trailing={
             <button type="button" aria-label="Show password" className="ml-[18px] text-[#828BA9]">
               <FiEye className="h-[25px] w-[25px]" aria-hidden="true" />

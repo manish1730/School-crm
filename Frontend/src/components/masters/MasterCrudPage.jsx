@@ -35,7 +35,7 @@ function FieldInput({ field, value, onChange }) {
       <select
         value={value}
         onChange={(event) => onChange(field.name, event.target.value)}
-        className={baseClass}
+        className={`${baseClass} cursor-pointer`}
       >
         <option value="">Select {field.label}</option>
         {(field.options || []).map((option) => (
@@ -58,7 +58,7 @@ function FieldInput({ field, value, onChange }) {
             Array.from(event.target.selectedOptions).map((option) => option.value)
           )
         }
-        className={`${baseClass} min-h-32`}
+        className={`${baseClass} min-h-32 cursor-pointer`}
       >
         {(field.options || []).map((option) => (
           <option key={option.value} value={option.value}>
@@ -265,7 +265,7 @@ export default function MasterCrudPage({
 
         <button
           onClick={openAddModal}
-          className="bg-blue-900 text-white px-6 py-2 rounded-lg"
+          className="bg-blue-900 text-white px-6 py-2 rounded-lg cursor-pointer"
         >
           + Add
         </button>
@@ -332,13 +332,13 @@ export default function MasterCrudPage({
               <div className="flex justify-end gap-4">
                 <button
                   onClick={() => handleEdit(record)}
-                  className="text-blue-500 hover:text-blue-700"
+                  className="text-blue-500 hover:text-blue-700 cursor-pointer"
                 >
                   <FaEdit />
                 </button>
                 <button
                   onClick={() => setDeleteRecord(record)}
-                  className="text-red-500 hover:text-red-700"
+                  className="text-red-500 hover:text-red-700 cursor-pointer"
                 >
                   <FaTrash />
                 </button>
@@ -353,7 +353,7 @@ export default function MasterCrudPage({
           <button
             onClick={() => setPage((current) => Math.max(1, current - 1))}
             disabled={page === 1}
-            className="bg-gray-200 px-4 py-2 rounded-lg disabled:opacity-50"
+            className="bg-gray-200 px-4 py-2 rounded-lg disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
           >
             Previous
           </button>
@@ -363,7 +363,7 @@ export default function MasterCrudPage({
           <button
             onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
             disabled={page === totalPages}
-            className="bg-gray-200 px-4 py-2 rounded-lg disabled:opacity-50"
+            className="bg-gray-200 px-4 py-2 rounded-lg disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
           >
             Next
           </button>
@@ -372,18 +372,19 @@ export default function MasterCrudPage({
 
       {showModal && (
         <MasterModal
+          onClose={() => setShowModal(false)}
           title={editId ? `Edit ${entityName}` : `Add ${entityName}`}
           footer={
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setShowModal(false)}
-                className="bg-gray-200 px-4 py-2 rounded-lg"
+                className="bg-gray-200 px-4 py-2 rounded-lg cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSave}
-                className="bg-blue-900 text-white px-5 py-2 rounded-lg"
+                className="bg-blue-900 text-white px-5 py-2 rounded-lg cursor-pointer"
               >
                 {editId ? "Update" : "Save"}
               </button>
@@ -394,7 +395,7 @@ export default function MasterCrudPage({
             {fields.map((field) => (
               <div key={field.name}>
                 <label className="block text-sm font-medium mb-2">
-                  {field.label}
+                  {field.label} {field.required && <span className="text-red-500 ml-1">*</span>}
                 </label>
                 <FieldInput
                   field={field}
@@ -421,18 +422,19 @@ export default function MasterCrudPage({
 
       {deleteRecord && (
         <MasterModal
+          onClose={() => setDeleteRecord(null)}
           title={`Delete ${entityName}`}
           footer={
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setDeleteRecord(null)}
-                className="bg-gray-200 px-4 py-2 rounded-lg"
+                className="bg-gray-200 px-4 py-2 rounded-lg cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDelete}
-                className="bg-red-600 text-white px-5 py-2 rounded-lg"
+                className="bg-red-600 text-white px-5 py-2 rounded-lg cursor-pointer"
               >
                 Delete
               </button>

@@ -53,6 +53,13 @@ export default function ExamResults({ reportMode = false }) {
       {selectedStudent && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto print:static print:bg-white print:p-0">
           <div className="bg-white rounded-2xl max-w-2xl w-full p-6 relative print:shadow-none print:p-0 print:m-0">
+            <button
+              onClick={() => setSelectedStudent(null)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 cursor-pointer transition-colors print:hidden"
+              aria-label="Close modal"
+            >
+              ✕
+            </button>
             {/* Modal Close / Print controls */}
             <div className="flex justify-end space-x-2 mb-4 print:hidden">
               <button onClick={handlePrint} className="bg-blue-900 text-white px-4 py-2 rounded-lg">Print / PDF</button>

@@ -7,11 +7,13 @@ const AcademicInfo = ({ formData, classSections, sections, onChange, next, prev 
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 sm:gap-5">
         <div>
-          <label className="mb-2 block font-medium">Class</label>
+          <label className="mb-2 block font-medium">
+            Class <span className="text-red-500 ml-0.5">*</span>
+          </label>
           <select
             value={formData.className}
             onChange={(event) => onChange("className", event.target.value)}
-            className="w-full rounded-lg border border-slate-300 p-3 outline-none focus:border-blue-500"
+            className="w-full rounded-lg border border-slate-300 p-3 outline-none focus:border-blue-500 cursor-pointer"
           >
             <option value="">Select Class</option>
             {classes.map((className) => (
@@ -21,11 +23,13 @@ const AcademicInfo = ({ formData, classSections, sections, onChange, next, prev 
         </div>
 
         <div>
-          <label className="mb-2 block font-medium">Section</label>
+          <label className="mb-2 block font-medium">
+            Section <span className="text-red-500 ml-0.5">*</span>
+          </label>
           <select
             value={formData.sectionName}
             onChange={(event) => onChange("sectionName", event.target.value)}
-            className="w-full rounded-lg border border-slate-300 p-3 outline-none focus:border-blue-500"
+            className="w-full rounded-lg border border-slate-300 p-3 outline-none focus:border-blue-500 cursor-pointer"
           >
             <option value="">Select Section</option>
             {sections.map((sectionName) => (
@@ -34,8 +38,8 @@ const AcademicInfo = ({ formData, classSections, sections, onChange, next, prev 
           </select>
         </div>
 
-        <Input label="Admission Date" type="date" value={formData.admissionDate} onChange={(value) => onChange("admissionDate", value)} />
-        <Input label="Roll Number" value={formData.rollNumber} onChange={(value) => onChange("rollNumber", value)} />
+        <Input required label="Admission Date" type="date" value={formData.admissionDate} onChange={(value) => onChange("admissionDate", value)} />
+        <Input required label="Roll Number" value={formData.rollNumber} onChange={(value) => onChange("rollNumber", value)} />
 
         <div className="md:col-span-2">
           <Input label="Previous School" value={formData.previousSchool} onChange={(value) => onChange("previousSchool", value)} />
@@ -43,10 +47,10 @@ const AcademicInfo = ({ formData, classSections, sections, onChange, next, prev 
       </div>
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
-        <button onClick={prev} className="rounded-lg border border-slate-300 px-5 py-3">
+        <button onClick={prev} className="rounded-lg border border-slate-300 px-5 py-3 cursor-pointer">
           ← Previous
         </button>
-        <button onClick={next} className="rounded-lg bg-blue-600 px-5 py-3 text-white">
+        <button onClick={next} className="rounded-lg bg-blue-600 px-5 py-3 text-white cursor-pointer">
           Next →
         </button>
       </div>
@@ -56,10 +60,12 @@ const AcademicInfo = ({ formData, classSections, sections, onChange, next, prev 
 
 export default AcademicInfo;
 
-function Input({ label, value, onChange, type = "text" }) {
+function Input({ label, value, onChange, type = "text", required }) {
   return (
     <div>
-      <label className="mb-2 block font-medium">{label}</label>
+      <label className="mb-2 block font-medium">
+        {label} {required && <span className="text-red-500 ml-0.5">*</span>}
+      </label>
       <input
         type={type}
         value={value}

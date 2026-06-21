@@ -2,9 +2,9 @@ import MasterCrudPage from "../../../components/masters/MasterCrudPage";
 import { examTypeService } from "../../../services/masterSetupServices";
 
 const fields = [
-  { name: "examName", label: "Exam Name" },
-  { name: "examCode", label: "Exam Code" },
-  { name: "weightage", label: "Weightage (%)", type: "number" },
+  { name: "examName", label: "Exam Name", required: true },
+  { name: "examCode", label: "Exam Code", required: true },
+  { name: "weightage", label: "Weightage (%)", type: "number", required: true },
   { name: "description", label: "Description", type: "textarea" },
 ];
 

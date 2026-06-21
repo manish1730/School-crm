@@ -186,7 +186,7 @@ export default function Enquiry() {
             resetModal();
             setShowModal(true);
           }}
-          className="bg-blue-900 text-white px-6 py-2 rounded-lg"
+          className="bg-blue-900 text-white px-6 py-2 rounded-lg cursor-pointer"
         >
           + Add Enquiry
         </button>
@@ -270,19 +270,19 @@ export default function Enquiry() {
                   <button
                     onClick={() => handleConvertEnquiry(enquiry._id)}
                     disabled={enquiry.status === "Converted"}
-                    className="text-xs text-green-600 disabled:text-gray-400"
+                    className="text-xs text-green-600 disabled:text-gray-400 cursor-pointer disabled:cursor-not-allowed"
                   >
                     Convert
                   </button>
                   <button
                     onClick={() => handleEditEnquiry(enquiry)}
-                    className="text-blue-500 hover:text-blue-700"
+                    className="text-blue-500 hover:text-blue-700 cursor-pointer"
                   >
                     <FaEdit />
                   </button>
                   <button
                     onClick={() => setDeleteTarget(enquiry)}
-                    className="text-red-500 hover:text-red-700"
+                    className="text-red-500 hover:text-red-700 cursor-pointer"
                   >
                     <FaTrash />
                   </button>
@@ -295,6 +295,7 @@ export default function Enquiry() {
 
       {showModal && (
         <MasterModal
+          onClose={() => setShowModal(false)}
           title={editId ? "Edit Enquiry" : "Add Enquiry"}
           footer={
             <div className="flex justify-end gap-3">
@@ -314,12 +315,12 @@ export default function Enquiry() {
           }
         >
           <div className="space-y-4 mb-4">
-            <Input label="Student Name" value={formData.studentName} onChange={(value) => setFormData({ ...formData, studentName: value })} />
-            <Input label="Phone Number" value={formData.phoneNumber} onChange={(value) => setFormData({ ...formData, phoneNumber: value })} />
-            <Select label="Source" value={formData.source} options={sources} onChange={(value) => setFormData({ ...formData, source: value })} />
-            <Input label="Counsellor" value={formData.counsellor} onChange={(value) => setFormData({ ...formData, counsellor: value })} />
+            <Input required label="Student Name" value={formData.studentName} onChange={(value) => setFormData({ ...formData, studentName: value })} />
+            <Input required label="Phone Number" value={formData.phoneNumber} onChange={(value) => setFormData({ ...formData, phoneNumber: value })} />
+            <Select required label="Source" value={formData.source} options={sources} onChange={(value) => setFormData({ ...formData, source: value })} />
+            <Input required label="Counsellor" value={formData.counsellor} onChange={(value) => setFormData({ ...formData, counsellor: value })} />
             <Input label="Date" type="date" value={formData.enquiryDate} onChange={(value) => setFormData({ ...formData, enquiryDate: value })} />
-            <Select label="Status" value={formData.status} options={statuses} onChange={(value) => setFormData({ ...formData, status: value })} />
+            <Select required label="Status" value={formData.status} options={statuses} onChange={(value) => setFormData({ ...formData, status: value })} />
           </div>
 
           {error && (
@@ -338,6 +339,7 @@ export default function Enquiry() {
 
       {deleteTarget && (
         <MasterModal
+          onClose={() => setDeleteTarget(null)}
           title="Delete Enquiry"
           footer={
             <div className="flex justify-end gap-3">
@@ -374,10 +376,12 @@ function StatCard({ label, value }) {
   );
 }
 
-function Input({ label, value, onChange, type = "text" }) {
+function Input({ label, value, onChange, type = "text", required }) {
   return (
     <div>
-      <label className="block text-sm font-medium mb-2">{label}</label>
+      <label className="block text-sm font-medium mb-2">
+        {label} {required && <span className="text-red-500 ml-0.5">*</span>}
+      </label>
       <input
         type={type}
         value={value}
@@ -388,14 +392,16 @@ function Input({ label, value, onChange, type = "text" }) {
   );
 }
 
-function Select({ label, value, options, onChange }) {
+function Select({ label, value, options, onChange, required }) {
   return (
     <div>
-      <label className="block text-sm font-medium mb-2">{label}</label>
+      <label className="block text-sm font-medium mb-2">
+        {label} {required && <span className="text-red-500 ml-0.5">*</span>}
+      </label>
       <select
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="w-full bg-gray-100 rounded-lg px-4 py-3 outline-none"
+        className="w-full bg-gray-100 rounded-lg px-4 py-3 outline-none cursor-pointer"
       >
         <option value="">Select {label}</option>
         {options.map((option) => (

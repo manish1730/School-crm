@@ -11,7 +11,7 @@ const eventTypes = [
 ];
 
 const fields = [
-  { name: "eventTitle", label: "Event Title" },
+  { name: "eventTitle", label: "Event Title", required: true },
   {
     name: "eventType",
     label: "Event Type",
@@ -20,9 +20,10 @@ const fields = [
       label: type,
       value: type,
     })),
+    required: true,
   },
-  { name: "startDate", label: "Start Date", type: "date" },
-  { name: "endDate", label: "End Date", type: "date" },
+  { name: "startDate", label: "Start Date", type: "date", required: true },
+  { name: "endDate", label: "End Date", type: "date", required: true },
   { name: "description", label: "Description", type: "textarea" },
 ];
 

@@ -4,20 +4,20 @@ const GuardianInfo = ({ formData, onChange, next, prev }) => {
       <h2 className="text-lg sm:text-xl font-semibold">Guardian Details</h2>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 sm:gap-5">
-        <Input label="Father Name" value={formData.fatherName} onChange={(value) => onChange("fatherName", value)} />
-        <Input label="Father Phone" value={formData.fatherPhone} onChange={(value) => onChange("fatherPhone", value)} />
+        <Input required label="Father Name" value={formData.fatherName} onChange={(value) => onChange("fatherName", value)} />
+        <Input required label="Father Phone" value={formData.fatherPhone} onChange={(value) => onChange("fatherPhone", value)} />
         <Input label="Father Email" value={formData.fatherEmail} onChange={(value) => onChange("fatherEmail", value)} />
         <Input label="Father Occupation" value={formData.fatherOccupation} onChange={(value) => onChange("fatherOccupation", value)} />
-        <Input label="Mother Name" value={formData.motherName} onChange={(value) => onChange("motherName", value)} />
+        <Input required label="Mother Name" value={formData.motherName} onChange={(value) => onChange("motherName", value)} />
         <Input label="Mother Phone" value={formData.motherPhone} onChange={(value) => onChange("motherPhone", value)} />
         <Input label="Mother Occupation" value={formData.motherOccupation} onChange={(value) => onChange("motherOccupation", value)} />
       </div>
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
-        <button onClick={prev} className="rounded-lg border border-slate-300 px-5 py-3">
+        <button onClick={prev} className="rounded-lg border border-slate-300 px-5 py-3 cursor-pointer">
           ← Previous
         </button>
-        <button onClick={next} className="rounded-lg bg-blue-600 px-5 py-3 text-white">
+        <button onClick={next} className="rounded-lg bg-blue-600 px-5 py-3 text-white cursor-pointer">
           Next →
         </button>
       </div>
@@ -27,10 +27,12 @@ const GuardianInfo = ({ formData, onChange, next, prev }) => {
 
 export default GuardianInfo;
 
-function Input({ label, value, onChange }) {
+function Input({ label, value, onChange, required }) {
   return (
     <div>
-      <label className="mb-2 block font-medium">{label}</label>
+      <label className="mb-2 block font-medium">
+        {label} {required && <span className="text-red-500 ml-0.5">*</span>}
+      </label>
       <input
         value={value}
         onChange={(event) => onChange(event.target.value)}

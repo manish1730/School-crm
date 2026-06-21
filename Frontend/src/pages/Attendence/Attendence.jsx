@@ -108,31 +108,47 @@ const Attendence = () => {
 
       <div className="rounded-2xl bg-white p-4 shadow-sm">
         <div className="grid gap-3 md:grid-cols-3">
-          <select
-            value={className}
-            onChange={(event) => {
-              setClassName(event.target.value);
-              setSectionName("");
-            }}
-            className="w-full bg-gray-100 rounded-lg px-4 py-3 outline-none"
-          >
-            <option value="">Select Class</option>
-            {classes.map((item) => <option key={item} value={item}>{item}</option>)}
-          </select>
-          <select
-            value={sectionName}
-            onChange={(event) => setSectionName(event.target.value)}
-            className="w-full bg-gray-100 rounded-lg px-4 py-3 outline-none"
-          >
-            <option value="">Select Section</option>
-            {sections.map((item) => <option key={item} value={item}>{item}</option>)}
-          </select>
-          <input
-            type="date"
-            value={date}
-            onChange={(event) => setDate(event.target.value)}
-            className="w-full bg-gray-100 rounded-lg px-4 py-3 outline-none"
-          />
+          <div>
+            <label className="block text-sm font-medium mb-2 text-gray-700">
+              Class <span className="text-red-500 ml-0.5">*</span>
+            </label>
+            <select
+              value={className}
+              onChange={(event) => {
+                setClassName(event.target.value);
+                setSectionName("");
+              }}
+              className="w-full bg-gray-100 rounded-lg px-4 py-3 outline-none cursor-pointer"
+            >
+              <option value="">Select Class</option>
+              {classes.map((item) => <option key={item} value={item}>{item}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2 text-gray-700">
+              Section <span className="text-red-500 ml-0.5">*</span>
+            </label>
+            <select
+              value={sectionName}
+              onChange={(event) => setSectionName(event.target.value)}
+              className="w-full bg-gray-100 rounded-lg px-4 py-3 outline-none cursor-pointer"
+              disabled={!className}
+            >
+              <option value="">Select Section</option>
+              {sections.map((item) => <option key={item} value={item}>{item}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2 text-gray-700">
+              Attendance Date <span className="text-red-500 ml-0.5">*</span>
+            </label>
+            <input
+              type="date"
+              value={date}
+              onChange={(event) => setDate(event.target.value)}
+              className="w-full bg-gray-100 rounded-lg px-4 py-3 outline-none"
+            />
+          </div>
         </div>
 
         <div className="overflow-x-auto mt-4">

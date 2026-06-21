@@ -135,60 +135,80 @@ const Promotion = () => {
       )}
 
       <div className="rounded-2xl bg-white p-4 shadow-sm">
-        <div className="grid gap-3 md:grid-cols-4">
-          <select
-            value={fromClass}
-            onChange={(e) => setFromClass(e.target.value)}
-            className="w-full bg-gray-100 rounded-lg px-4 py-3 outline-none"
-          >
-            <option value="">From Class</option>
-            {uniqueClasses.map((cls) => (
-              <option key={cls} value={cls}>
-                {cls}
-              </option>
-            ))}
-          </select>
+        <div className="grid gap-4 md:grid-cols-4">
+          <div>
+            <label className="block text-sm font-medium mb-2 text-gray-700">
+              From Class <span className="text-red-500 ml-0.5">*</span>
+            </label>
+            <select
+              value={fromClass}
+              onChange={(e) => setFromClass(e.target.value)}
+              className="w-full bg-gray-100 rounded-lg px-4 py-3 outline-none cursor-pointer"
+            >
+              <option value="">Select From Class</option>
+              {uniqueClasses.map((cls) => (
+                <option key={cls} value={cls}>
+                  {cls}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-2 text-gray-700">
+              From Section <span className="text-red-500 ml-0.5">*</span>
+            </label>
+            <select
+              value={fromSection}
+              onChange={(e) => setFromSection(e.target.value)}
+              className="w-full bg-gray-100 rounded-lg px-4 py-3 outline-none cursor-pointer"
+              disabled={!fromClass}
+            >
+              <option value="">Select From Section</option>
+              {getSections(fromClass).map((sec) => (
+                <option key={sec} value={sec}>
+                  {sec}
+                </option>
+              ))}
+            </select>
+          </div>
 
-          <select
-            value={fromSection}
-            onChange={(e) => setFromSection(e.target.value)}
-            className="w-full bg-gray-100 rounded-lg px-4 py-3 outline-none"
-            disabled={!fromClass}
-          >
-            <option value="">From Section</option>
-            {getSections(fromClass).map((sec) => (
-              <option key={sec} value={sec}>
-                {sec}
-              </option>
-            ))}
-          </select>
+          <div>
+            <label className="block text-sm font-medium mb-2 text-gray-700">
+              To Class <span className="text-red-500 ml-0.5">*</span>
+            </label>
+            <select
+              value={toClass}
+              onChange={(e) => setToClass(e.target.value)}
+              className="w-full bg-gray-100 rounded-lg px-4 py-3 outline-none cursor-pointer"
+            >
+              <option value="">Select To Class</option>
+              {uniqueClasses.map((cls) => (
+                <option key={cls} value={cls}>
+                  {cls}
+                </option>
+              ))}
+            </select>
+          </div>
 
-          <select
-            value={toClass}
-            onChange={(e) => setToClass(e.target.value)}
-            className="w-full bg-gray-100 rounded-lg px-4 py-3 outline-none"
-          >
-            <option value="">To Class</option>
-            {uniqueClasses.map((cls) => (
-              <option key={cls} value={cls}>
-                {cls}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={toSection}
-            onChange={(e) => setToSection(e.target.value)}
-            className="w-full bg-gray-100 rounded-lg px-4 py-3 outline-none"
-            disabled={!toClass}
-          >
-            <option value="">To Section</option>
-            {getSections(toClass).map((sec) => (
-              <option key={sec} value={sec}>
-                {sec}
-              </option>
-            ))}
-          </select>
+          <div>
+            <label className="block text-sm font-medium mb-2 text-gray-700">
+              To Section <span className="text-red-500 ml-0.5">*</span>
+            </label>
+            <select
+              value={toSection}
+              onChange={(e) => setToSection(e.target.value)}
+              className="w-full bg-gray-100 rounded-lg px-4 py-3 outline-none cursor-pointer"
+              disabled={!toClass}
+            >
+              <option value="">Select To Section</option>
+              {getSections(toClass).map((sec) => (
+                <option key={sec} value={sec}>
+                  {sec}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="mt-4 flex justify-end">

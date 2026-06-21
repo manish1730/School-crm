@@ -112,10 +112,12 @@ function Card({ label, value }) {
   );
 }
 
-function Input({ label, value, onChange, type = "text", min }) {
+function Input({ label, value, onChange, type = "text", min, required }) {
   return (
     <div>
-      <label className="block text-sm font-medium mb-2">{label}</label>
+      <label className="block text-sm font-medium mb-2">
+        {label} {required && <span className="text-red-500 ml-0.5">*</span>}
+      </label>
       <input
         type={type}
         value={value}
@@ -127,14 +129,16 @@ function Input({ label, value, onChange, type = "text", min }) {
   );
 }
 
-function Select({ label, value, options, onChange }) {
+function Select({ label, value, options, onChange, required }) {
   return (
     <div>
-      <label className="block text-sm font-medium mb-2">{label}</label>
+      <label className="block text-sm font-medium mb-2">
+        {label} {required && <span className="text-red-500 ml-0.5">*</span>}
+      </label>
       <select
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="w-full bg-gray-100 rounded-lg px-4 py-3 outline-none"
+        className="w-full bg-gray-100 rounded-lg px-4 py-3 outline-none cursor-pointer"
       >
         <option value="">Select {label}</option>
         {options.map((option) => (
@@ -497,7 +501,7 @@ export default function FeeandFinance() {
               key={tab.value}
               type="button"
               onClick={() => setActiveTab(tab.value)}
-              className={`whitespace-nowrap rounded-xl px-4 py-2 text-sm sm:text-base transition-all ${
+              className={`whitespace-nowrap rounded-xl px-4 py-2 text-sm sm:text-base transition-all cursor-pointer ${
                 activeTab === tab.value
                   ? "bg-white text-blue-900 shadow font-semibold"
                   : "text-gray-600 hover:bg-gray-200"
@@ -566,7 +570,7 @@ export default function FeeandFinance() {
                   type="button"
                   onClick={() => handleExport("collection", "pdf")}
                   disabled={!!exporting}
-                  className="flex items-center gap-2 bg-blue-900 text-white px-4 py-3 rounded-lg disabled:opacity-60"
+                  className="flex items-center gap-2 bg-blue-900 text-white px-4 py-3 rounded-lg disabled:opacity-60 cursor-pointer disabled:cursor-not-allowed"
                 >
                   <FaFilePdf /> PDF
                 </button>
@@ -574,7 +578,7 @@ export default function FeeandFinance() {
                   type="button"
                   onClick={() => handleExport("collection", "excel")}
                   disabled={!!exporting}
-                  className="flex items-center gap-2 bg-green-700 text-white px-4 py-3 rounded-lg disabled:opacity-60"
+                  className="flex items-center gap-2 bg-green-700 text-white px-4 py-3 rounded-lg disabled:opacity-60 cursor-pointer disabled:cursor-not-allowed"
                 >
                   <FaFileExcel /> Excel
                 </button>
@@ -619,7 +623,7 @@ export default function FeeandFinance() {
                       type="button"
                       onClick={() => openPaymentModal(item)}
                       disabled={item.remainingAmount <= 0}
-                      className="bg-blue-900 text-white px-4 py-2 rounded-lg disabled:opacity-50"
+                      className="bg-blue-900 text-white px-4 py-2 rounded-lg disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                     >
                       Record Payment
                     </button>
@@ -655,7 +659,7 @@ export default function FeeandFinance() {
                   });
                   setShowStructureModal(true);
                 }}
-                className="bg-blue-900 text-white px-6 py-2 rounded-lg"
+                className="bg-blue-900 text-white px-6 py-2 rounded-lg cursor-pointer"
               >
                 + Add Fee Structure
               </button>
@@ -684,7 +688,7 @@ export default function FeeandFinance() {
                   type="button"
                   onClick={() => handleExport("structure", "pdf")}
                   disabled={!!exporting}
-                  className="flex items-center gap-2 bg-blue-900 text-white px-4 py-3 rounded-lg disabled:opacity-60"
+                  className="flex items-center gap-2 bg-blue-900 text-white px-4 py-3 rounded-lg disabled:opacity-60 cursor-pointer disabled:cursor-not-allowed"
                 >
                   <FaFilePdf /> PDF
                 </button>
@@ -692,7 +696,7 @@ export default function FeeandFinance() {
                   type="button"
                   onClick={() => handleExport("structure", "excel")}
                   disabled={!!exporting}
-                  className="flex items-center gap-2 bg-green-700 text-white px-4 py-3 rounded-lg disabled:opacity-60"
+                  className="flex items-center gap-2 bg-green-700 text-white px-4 py-3 rounded-lg disabled:opacity-60 cursor-pointer disabled:cursor-not-allowed"
                 >
                   <FaFileExcel /> Excel
                 </button>
@@ -736,14 +740,14 @@ export default function FeeandFinance() {
                     <button
                       type="button"
                       onClick={() => openEditStructure(item)}
-                      className="text-blue-600 hover:text-blue-800"
+                      className="text-blue-600 hover:text-blue-800 cursor-pointer"
                     >
                       <FaEye />
                     </button>
                     <button
                       type="button"
                       onClick={() => setDeleteTarget(item)}
-                      className="text-red-500 hover:text-red-700"
+                      className="text-red-500 hover:text-red-700 cursor-pointer"
                     >
                       <FaTrash />
                     </button>
@@ -764,13 +768,14 @@ export default function FeeandFinance() {
       {/* ── Add / Edit Fee Structure Modal ── */}
       {showStructureModal && (
         <MasterModal
+          onClose={() => setShowStructureModal(false)}
           title={editStructureId ? "Edit Fee Structure" : "Add Fee Structure"}
           footer={
             <div className="flex justify-end gap-3">
               <button
                 type="button"
                 onClick={() => setShowStructureModal(false)}
-                className="bg-gray-200 px-4 py-2 rounded-lg"
+                className="bg-gray-200 px-4 py-2 rounded-lg cursor-pointer"
               >
                 Cancel
               </button>
@@ -778,7 +783,7 @@ export default function FeeandFinance() {
                 type="button"
                 onClick={handleSaveStructure}
                 disabled={actionLoading}
-                className="bg-blue-900 text-white px-5 py-2 rounded-lg disabled:opacity-60"
+                className="bg-blue-900 text-white px-5 py-2 rounded-lg disabled:opacity-60 cursor-pointer disabled:cursor-not-allowed"
               >
                 {actionLoading ? "Saving..." : editStructureId ? "Update" : "Save"}
               </button>
@@ -787,18 +792,20 @@ export default function FeeandFinance() {
         >
           <div className="space-y-4 mb-4">
             <Select
+              required
               label="Academic Year"
               value={structureForm.academicYearId}
               options={academicYearOptions}
               onChange={(value) => setStructureForm({ ...structureForm, academicYearId: value })}
             />
             <Select
+              required
               label="Class Group"
               value={structureForm.classSectionId}
               options={classSectionOptions}
               onChange={(value) => setStructureForm({ ...structureForm, classSectionId: value })}
             />
-            <Input label="Tuition Fee"    type="number" min="0" value={structureForm.tuitionFee}    onChange={(value) => setStructureForm({ ...structureForm, tuitionFee: value })} />
+            <Input required label="Tuition Fee"    type="number" min="0" value={structureForm.tuitionFee}    onChange={(value) => setStructureForm({ ...structureForm, tuitionFee: value })} />
             <Input label="Admission Fee"  type="number" min="0" value={structureForm.admissionFee}  onChange={(value) => setStructureForm({ ...structureForm, admissionFee: value })} />
             <Input label="Exam Fee"       type="number" min="0" value={structureForm.examFee}       onChange={(value) => setStructureForm({ ...structureForm, examFee: value })} />
             <Input label="Transport Fee"  type="number" min="0" value={structureForm.transportFee}  onChange={(value) => setStructureForm({ ...structureForm, transportFee: value })} />
@@ -840,13 +847,14 @@ export default function FeeandFinance() {
       {/* ── Record Payment Modal ── */}
       {showPaymentModal && (
         <MasterModal
+          onClose={() => setShowPaymentModal(false)}
           title="Record Payment"
           footer={
             <div className="flex justify-end gap-3">
               <button
                 type="button"
                 onClick={() => setShowPaymentModal(false)}
-                className="bg-gray-200 px-4 py-2 rounded-lg"
+                className="bg-gray-200 px-4 py-2 rounded-lg cursor-pointer"
               >
                 Cancel
               </button>
@@ -854,7 +862,7 @@ export default function FeeandFinance() {
                 type="button"
                 onClick={handleRecordPayment}
                 disabled={actionLoading}
-                className="bg-blue-900 text-white px-5 py-2 rounded-lg disabled:opacity-60"
+                className="bg-blue-900 text-white px-5 py-2 rounded-lg disabled:opacity-60 cursor-pointer disabled:cursor-not-allowed"
               >
                 {actionLoading ? "Saving..." : "Record Payment"}
               </button>
@@ -863,6 +871,7 @@ export default function FeeandFinance() {
         >
           <div className="space-y-4 mb-4">
             <Select
+              required
               label="Student"
               value={paymentForm.studentId}
               options={studentOptions}
@@ -873,6 +882,7 @@ export default function FeeandFinance() {
               }}
             />
             <Select
+              required
               label="Academic Year"
               value={paymentForm.academicYearId}
               options={academicYearOptions}
@@ -891,14 +901,16 @@ export default function FeeandFinance() {
               </div>
             )}
             <Select
+              required
               label="Fee Head"
               value={paymentForm.feeHead}
               options={feeHeads.map((item) => ({ label: item, value: item }))}
               onChange={(value) => setPaymentForm({ ...paymentForm, feeHead: value })}
             />
-            <Input label="Payment Date"          type="date"   value={paymentForm.paymentDate}         onChange={(value) => setPaymentForm({ ...paymentForm, paymentDate: value })} />
-            <Input label="Amount Paid"           type="number" min="1" value={paymentForm.amountPaid}  onChange={(value) => setPaymentForm({ ...paymentForm, amountPaid: value })} />
+            <Input required label="Payment Date"          type="date"   value={paymentForm.paymentDate}         onChange={(value) => setPaymentForm({ ...paymentForm, paymentDate: value })} />
+            <Input required label="Amount Paid"           type="number" min="1" value={paymentForm.amountPaid}  onChange={(value) => setPaymentForm({ ...paymentForm, amountPaid: value })} />
             <Select
+              required
               label="Payment Mode"
               value={paymentForm.paymentMode}
               options={paymentModes.map((item) => ({ label: item, value: item }))}
@@ -920,13 +932,14 @@ export default function FeeandFinance() {
       {/* ── Delete Confirmation Modal ── */}
       {deleteTarget && (
         <MasterModal
+          onClose={() => setDeleteTarget(null)}
           title="Delete Fee Structure"
           footer={
             <div className="flex justify-end gap-3">
               <button
                 type="button"
                 onClick={() => setDeleteTarget(null)}
-                className="bg-gray-200 px-4 py-2 rounded-lg"
+                className="bg-gray-200 px-4 py-2 rounded-lg cursor-pointer"
               >
                 Cancel
               </button>
@@ -934,7 +947,7 @@ export default function FeeandFinance() {
                 type="button"
                 onClick={handleDeleteStructure}
                 disabled={actionLoading}
-                className="bg-red-600 text-white px-5 py-2 rounded-lg disabled:opacity-60"
+                className="bg-red-600 text-white px-5 py-2 rounded-lg disabled:opacity-60 cursor-pointer disabled:cursor-not-allowed"
               >
                 {actionLoading ? "Deleting..." : "Delete"}
               </button>
@@ -950,27 +963,28 @@ export default function FeeandFinance() {
       {/* ── Receipt Modal ── */}
       {receipt && (
         <MasterModal
+          onClose={() => setReceipt(null)}
           title="Fee Receipt"
           footer={
             <div className="flex justify-end gap-3">
               <button
                 type="button"
                 onClick={() => setReceipt(null)}
-                className="bg-gray-200 px-4 py-2 rounded-lg"
+                className="bg-gray-200 px-4 py-2 rounded-lg cursor-pointer"
               >
                 Close
               </button>
               <button
                 type="button"
                 onClick={() => handleDownloadReceipt(receipt._id)}
-                className="flex items-center gap-2 bg-blue-900 text-white px-4 py-2 rounded-lg"
+                className="flex items-center gap-2 bg-blue-900 text-white px-4 py-2 rounded-lg cursor-pointer"
               >
                 <FaDownload /> Download
               </button>
               <button
                 type="button"
                 onClick={() => handleDownloadReceipt(receipt._id, true)}
-                className="flex items-center gap-2 bg-green-700 text-white px-4 py-2 rounded-lg"
+                className="flex items-center gap-2 bg-green-700 text-white px-4 py-2 rounded-lg cursor-pointer"
               >
                 <FaPrint /> Print
               </button>
@@ -998,7 +1012,7 @@ function Pagination({ page, totalPages, onPageChange }) {
         type="button"
         onClick={() => onPageChange(Math.max(1, page - 1))}
         disabled={page === 1}
-        className="bg-gray-200 px-4 py-2 rounded-lg disabled:opacity-50"
+        className="bg-gray-200 px-4 py-2 rounded-lg disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
       >
         Previous
       </button>
@@ -1007,7 +1021,7 @@ function Pagination({ page, totalPages, onPageChange }) {
           key={item}
           type="button"
           onClick={() => onPageChange(item)}
-          className={`px-3 py-2 rounded-lg ${
+          className={`px-3 py-2 rounded-lg cursor-pointer ${
             item === page ? "bg-blue-900 text-white" : "bg-gray-200"
           }`}
         >
@@ -1018,7 +1032,7 @@ function Pagination({ page, totalPages, onPageChange }) {
         type="button"
         onClick={() => onPageChange(Math.min(totalPages, page + 1))}
         disabled={page === totalPages}
-        className="bg-gray-200 px-4 py-2 rounded-lg disabled:opacity-50"
+        className="bg-gray-200 px-4 py-2 rounded-lg disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
       >
         Next
       </button>

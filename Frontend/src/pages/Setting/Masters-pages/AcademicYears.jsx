@@ -283,7 +283,7 @@ const handleEdit = (year) => {
 
                  setShowModal(true);
              }}
-              className="bg-blue-900 text-white px-6 py-2 rounded-lg"
+              className="bg-blue-900 text-white px-6 py-2 rounded-lg cursor-pointer"
             >
               + Add
             </button>
@@ -318,14 +318,14 @@ const handleEdit = (year) => {
             <div className="flex justify-end gap-4">
               <button
                 onClick={() => handleEdit(year)}
-                className="text-blue-500 hover:text-blue-700"
+                className="text-blue-500 hover:text-blue-700 cursor-pointer"
               >
                 <FaEdit />
               </button>
 
               <button
                 onClick={() => handleDelete(year._id)}
-                className="text-red-500 hover:text-red-700"
+                className="text-red-500 hover:text-red-700 cursor-pointer"
               >
                 <FaTrash />
               </button>
@@ -338,14 +338,24 @@ const handleEdit = (year) => {
       {showModal && (
         <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
           <div className="bg-white w-full max-w-md rounded-xl p-6 shadow-lg">
-            <h3 className="text-xl font-semibold mb-4">
-              {editId ? "Edit Academic Year" : "Add Academic Year"}
-            </h3>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold">
+                {editId ? "Edit Academic Year" : "Add Academic Year"}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowModal(false)}
+                className="text-gray-400 hover:text-gray-700 cursor-pointer transition-colors"
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
 
             <div className="space-y-4 mb-4">
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  Start Date
+                  Start Date <span className="text-red-500 ml-0.5">*</span>
                 </label>
 
                 <input
@@ -358,7 +368,7 @@ const handleEdit = (year) => {
 
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  End Date
+                  End Date <span className="text-red-500 ml-0.5">*</span>
                 </label>
 
                 <input
@@ -384,14 +394,14 @@ const handleEdit = (year) => {
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setShowModal(false)}
-                className="bg-gray-200 px-4 py-2 rounded-lg"
+                className="bg-gray-200 px-4 py-2 rounded-lg cursor-pointer"
               >
                 Cancel
               </button>
 
               <button
                 onClick={handleAddYear}
-                className="bg-blue-900 text-white px-5 py-2 rounded-lg"
+                className="bg-blue-900 text-white px-5 py-2 rounded-lg cursor-pointer"
               >
                 {editId ? "Update" : "Save"}
               </button>

@@ -68,8 +68,18 @@ export default function StaffAttendance() {
       {successMessage && <div className="p-3 rounded-lg bg-green-100 text-green-700">{successMessage}</div>}
 
       <div className="rounded-2xl bg-white p-4 shadow-sm">
-        <input type="date" value={date} onChange={(event) => setDate(event.target.value)} className="bg-gray-100 rounded-lg px-4 py-3 outline-none" />
-        <div className="overflow-x-auto mt-4">
+        <div className="max-w-xs mb-4">
+          <label className="block text-sm font-medium mb-2 text-gray-700">
+            Attendance Date <span className="text-red-500 ml-0.5">*</span>
+          </label>
+          <input
+            type="date"
+            value={date}
+            onChange={(event) => setDate(event.target.value)}
+            className="w-full bg-gray-100 rounded-lg px-4 py-3 outline-none"
+          />
+        </div>
+        <div className="overflow-x-auto">
           <div className="grid grid-cols-[60px_1.5fr_1fr_1fr_240px] bg-gray-100 p-4 font-semibold rounded-lg min-w-[800px]">
             <div>#</div><div>Name</div><div>Department</div><div>Status</div><div className="text-right">Action</div>
           </div>

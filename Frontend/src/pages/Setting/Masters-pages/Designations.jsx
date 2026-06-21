@@ -41,13 +41,14 @@ export default function Designations() {
   }, []);
 
   const fields = [
-    { name: "designationName", label: "Designation Name" },
-    { name: "designationCode", label: "Designation Code" },
+    { name: "designationName", label: "Designation Name", required: true },
+    { name: "designationCode", label: "Designation Code", required: true },
     {
       name: "department",
       label: "Department",
       type: "select",
       options: departmentOptions,
+      required: true,
     },
     { name: "description", label: "Description", type: "textarea" },
   ];

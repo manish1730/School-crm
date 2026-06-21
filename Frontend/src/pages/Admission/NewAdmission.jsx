@@ -223,7 +223,7 @@ const NewAdmission = () => {
 export default NewAdmission;
 
 const StepItem = ({ number, title, active }) => (
-  <div className={`flex items-center gap-3 rounded-xl border px-4 py-3 ${active ? "border-blue-200 bg-blue-50" : "border-slate-100 bg-white"}`}>
+  <div className={`flex items-center gap-3 rounded-xl border px-4 py-3 cursor-pointer ${active ? "border-blue-200 bg-blue-50" : "border-slate-100 bg-white"}`}>
     <div
       className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold text-white ${
         active ? "bg-blue-500" : "bg-gray-300"

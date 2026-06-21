@@ -2,8 +2,8 @@ import MasterCrudPage from "../../../components/masters/MasterCrudPage";
 import { departmentService } from "../../../services/masterSetupServices";
 
 const fields = [
-  { name: "departmentName", label: "Department Name" },
-  { name: "departmentCode", label: "Department Code" },
+  { name: "departmentName", label: "Department Name", required: true },
+  { name: "departmentCode", label: "Department Code", required: true },
   { name: "hodName", label: "HOD Name" },
   { name: "description", label: "Description", type: "textarea" },
 ];

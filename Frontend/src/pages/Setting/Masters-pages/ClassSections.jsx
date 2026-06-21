@@ -2,10 +2,10 @@ import MasterCrudPage from "../../../components/masters/MasterCrudPage";
 import { classSectionService } from "../../../services/masterSetupServices";
 
 const fields = [
-  { name: "className", label: "Class Name" },
-  { name: "classCode", label: "Class Code" },
-  { name: "sectionName", label: "Section Name" },
-  { name: "sectionCapacity", label: "Section Capacity", type: "number" },
+  { name: "className", label: "Class Name", required: true },
+  { name: "classCode", label: "Class Code", required: true },
+  { name: "sectionName", label: "Section Name", required: true },
+  { name: "sectionCapacity", label: "Section Capacity", type: "number", required: true },
   { name: "classTeacher", label: "Class Teacher" },
   { name: "description", label: "Description", type: "textarea" },
 ];

@@ -53,8 +53,8 @@ export default function Subjects() {
   }, []);
 
   const fields = [
-    { name: "subjectName", label: "Subject Name" },
-    { name: "subjectCode", label: "Subject Code" },
+    { name: "subjectName", label: "Subject Name", required: true },
+    { name: "subjectCode", label: "Subject Code", required: true },
     {
       name: "subjectType",
       label: "Subject Type",
@@ -63,6 +63,7 @@ export default function Subjects() {
         { label: "Theory", value: "Theory" },
         { label: "Practical", value: "Practical" },
       ],
+      required: true,
     },
     {
       name: "applicableClasses",
@@ -70,6 +71,7 @@ export default function Subjects() {
       type: "multiselect",
       options: classOptions,
       defaultValue: [],
+      required: true,
     },
     { name: "description", label: "Description", type: "textarea" },
   ];

@@ -1,2 +1,22 @@
 @import "tailwindcss";
 
+/* UX Cursor Pointer Improvements */
+button,
+a,
+select,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+input[type="checkbox"],
+input[type="radio"],
+input[type="file"],
+[role="button"],
+.cursor-pointer {
+  cursor: pointer !important;
+}
+
+/* Red Asterisk Styling */
+.required {
+  color: #ef4444; /* red-500 */
+  margin-left: 0.125rem;
+}
